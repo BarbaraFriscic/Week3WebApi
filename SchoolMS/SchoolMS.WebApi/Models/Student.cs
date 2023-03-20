@@ -19,5 +19,6 @@ namespace SchoolMS.WebApi.Models
         {
             return $"Id: {Id}\nFirst Name: {FirstName}\nLast Name: {LastName}\nDOB: {DOB}\nSchoolId: {SchoolId}";
         }
+
     }
 }

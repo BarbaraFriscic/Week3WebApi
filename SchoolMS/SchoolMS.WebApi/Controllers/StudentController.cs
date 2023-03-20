@@ -10,14 +10,14 @@ namespace SchoolMS.WebApi.Controllers
 {
     public class StudentController : ApiController
     {
-        public List<School> Schools = new List<School>();
-        public List<Student> Students = new List<Student>();
-        public StudentController()
+        public static List<School> Schools = new List<School>
         {
-          School firstSchool = new School { Id = 1, Name = "OŠ Retfala" };
-          School secondSchool = new School { Id = 2, Name = "OŠ Višnjevac" };
-
-        Student firstStudent = new Student
+            new School { Id = 1, Name = "OŠ Retfala" },
+            new School { Id = 2, Name = "OŠ Višnjevac" }
+        };
+        public static List<Student> Students = new List<Student>
+        {
+            new Student
         {
             Id = 1,
             FirstName = "Marko",
@@ -25,37 +25,31 @@ namespace SchoolMS.WebApi.Controllers
             Address = new Address { City = "Zagreb" },
             DOB = DateTime.Now.Date,
             SchoolId = 2
-        };
-        Student secondStudent = new Student
-        {
+        },
+            new Student
+            {
             Id = 2,
             FirstName = "Tanja",
             LastName = "Saric",
             Address = new Address { City = "Osijek", Street = "Gunduliceva 9" },
             DOB = DateTime.Now.Date,
             SchoolId = 1
-        };
-        Student thirdStudent = new Student
-        {
+            },
+            new Student
+            {
             Id = 3,
             FirstName = "Iva",
             LastName = "Bulic",
             Address = new Address { City = "Osijek", PostalCode = "31000" },
             DOB = DateTime.Now.Date,
             SchoolId = 2
-        };
-
-            Schools.Add(firstSchool);
-            Schools.Add(secondSchool);
-            Students.Add(firstStudent);
-            Students.Add(secondStudent);
-            Students.Add(thirdStudent);
-        }
-
+            }
+    };
+        public bool IsSuccess { get; set; }
+       
         [HttpGet]
         public List<Student> GetStudents()
-        {
-            
+        {           
             return Students;
         }
         
@@ -70,18 +64,19 @@ namespace SchoolMS.WebApi.Controllers
         public string DeleteStudent(int id)
         {
             string returnValue= "";
-            bool isSuccess;
             Student studentToDelete = Students.Find(s => s.Id == id);
             try
             {               
                 Students.Remove(studentToDelete);
-                isSuccess = true;
+                IsSuccess = true;
             }
             catch (Exception)
             {
-              isSuccess = false;
-            }
-            if(isSuccess)
+                IsSuccess = false;
+            }          
+
+            
+            if(IsSuccess)
             {
                 
                 foreach (Student student in Students) 
@@ -93,10 +88,41 @@ namespace SchoolMS.WebApi.Controllers
             else
             {
                 return "Unable to delete student";
-            }
+            } 
             
         }
 
+        [HttpPost]
+        public List<Student> CreateStudent([FromBody] Student student)
+        {
+            try
+            {               
+                Students.Add(student);
+                IsSuccess = true;
+            }
+            catch (Exception)
+            {
+               IsSuccess = false;
+            }
+                return Students;
+        }
 
+        [HttpPut]
+        public List<Student> UpdateStudent(int id)
+        {
+            try
+            {
+                Student studentToUpdate = Students.Find(s => s.Id == id);
+                studentToUpdate.FirstName = "novoIme";
+                studentToUpdate.LastName = "novoPrezime";
+                studentToUpdate.DOB = DateTime.Today.AddDays(1);
+                IsSuccess = true;
+            }
+            catch (Exception)
+            {
+                IsSuccess = false;
+            }
+            return Students;
+        }
     }
 }
