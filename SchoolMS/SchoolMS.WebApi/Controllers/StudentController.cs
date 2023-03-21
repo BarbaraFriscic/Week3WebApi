@@ -10,12 +10,12 @@ namespace SchoolMS.WebApi.Controllers
 {
     public class StudentController : ApiController
     {
-        public static List<School> Schools = new List<School>
+        public static List<School> schools = new List<School>
         {
             new School { Id = 1, Name = "OŠ Retfala" },
             new School { Id = 2, Name = "OŠ Višnjevac" }
         };
-        public static List<Student> Students = new List<Student>
+        public static List<Student> students = new List<Student>
         {
             new Student
         {
@@ -45,84 +45,128 @@ namespace SchoolMS.WebApi.Controllers
             SchoolId = 2
             }
     };
-        public bool IsSuccess { get; set; }
-       
+
         [HttpGet]
-        public List<Student> GetStudents()
-        {           
-            return Students;
-        }
-        
-        [HttpGet]
-        public Student GetStudent(int id)
+        public HttpResponseMessage GetStudents()
         {
-            
-            Student studentToReturn = Students.Find(s => s.Id == id);
-            return studentToReturn;
-        }
-        [HttpDelete]
-        public string DeleteStudent(int id)
-        {
-            string returnValue= "";
-            Student studentToDelete = Students.Find(s => s.Id == id);
             try
-            {               
-                Students.Remove(studentToDelete);
-                IsSuccess = true;
+            {
+                List<Student> studentsToReturn = students.ToList();
+                if (studentsToReturn != null)
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, studentsToReturn);
+                }
+                else
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No Students found");
+                }
             }
             catch (Exception)
             {
-                IsSuccess = false;
-            }          
-
-            
-            if(IsSuccess)
-            {
-                
-                foreach (Student student in Students) 
-                {
-                    returnValue += student.ToString() + "\n";
-                }
-                return "Success" + $"\n{returnValue}";
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Error occured while executing GetStudents");
             }
-            else
+        }
+
+        [HttpGet]
+        public HttpResponseMessage GetStudent(int id)
+        {
+            try
             {
-                return "Unable to delete student";
-            } 
-            
+                // Student studentToReturn = Students.Find(s => s.Id == id);
+                Student studentToReturn = students.Where(s => s.Id == id).FirstOrDefault();
+                if (studentToReturn != null)
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, studentToReturn);
+                }
+                else
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"No Student with an id: {id}");
+                }
+            }
+            catch (Exception)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting GetStudent({id})");
+            }
+        }
+        [HttpDelete]
+        public HttpResponseMessage DeleteStudent(int id)
+        {
+            try
+            {
+                //Student studentToDelete = Students.Find(s => s.Id == id);
+                Student studentToDelete = students.Where(s => s.Id == id).FirstOrDefault();
+                if(studentToDelete != null)
+                {
+                    students.Remove(studentToDelete);
+                    return Request.CreateResponse(HttpStatusCode.OK, students);
+                }
+                else
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"No Student with an Id:{id}. Unable to Delete.");
+                }
+            }
+            catch (Exception)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting DeleteStudent({id})");
+            }
         }
 
         [HttpPost]
-        public List<Student> CreateStudent([FromBody] Student student)
+        public HttpResponseMessage CreateNewStudent(Student student)
         {
             try
-            {               
-                Students.Add(student);
-                IsSuccess = true;
+            {
+                if (!ModelState.IsValid)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+                }
+                Student studentCheck = students.Find(s => s.Id == student.Id);
+                if (studentCheck != null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Student with an Id: {student.Id} already exists.");
+                }
+
+                Student newStudent = new Student
+                {
+                      Id = student.Id,
+                      FirstName = student.FirstName,
+                      LastName = student.LastName,
+                      DOB = student.DOB,
+                      SchoolId = student.SchoolId
+                 };
+                 students.Add(newStudent);
+                 return Request.CreateResponse(HttpStatusCode.OK, newStudent);                               
             }
             catch (Exception)
             {
-               IsSuccess = false;
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting CreateNewStudent(Student student)");
             }
-                return Students;
+           
         }
 
         [HttpPut]
-        public List<Student> UpdateStudent(int id)
-        {
+        public HttpResponseMessage UpdateStudent([FromBody]int id, [FromUri] Student student)
+        {  
             try
             {
-                Student studentToUpdate = Students.Find(s => s.Id == id);
-                studentToUpdate.FirstName = "novoIme";
-                studentToUpdate.LastName = "novoPrezime";
-                studentToUpdate.DOB = DateTime.Today.AddDays(1);
-                IsSuccess = true;
+                Student studentToUpdate = students.Find(s => s.Id == id);
+                if(studentToUpdate != null)
+                {
+                    studentToUpdate.FirstName = string.IsNullOrWhiteSpace(student.FirstName)?studentToUpdate.FirstName : student.FirstName;
+                    studentToUpdate.LastName = string.IsNullOrWhiteSpace(student.LastName)?studentToUpdate.LastName : student.LastName;
+                    studentToUpdate.DOB = Convert.ToDateTime(string.IsNullOrWhiteSpace(student.DOB.ToString())?studentToUpdate.DOB : student.DOB);
+                    studentToUpdate.Address = studentToUpdate.Address;
+                    studentToUpdate.SchoolId = Convert.ToInt32(string.IsNullOrWhiteSpace(student.SchoolId.ToString()) ? studentToUpdate.SchoolId : student.SchoolId);
+                    return Request.CreateResponse(HttpStatusCode.OK, students);
+                }
+
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to find a student with an Id: {id}");
             }
             catch (Exception)
             {
-                IsSuccess = false;
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting UpdateStudent({id},student)");
             }
-            return Students;
+           
         }
     }
 }
