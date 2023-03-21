@@ -116,31 +116,27 @@ namespace SchoolMS.WebApi.Controllers
         {
             try
             {
-                if(student != null)
-                {
-                    Student newStudent = new Student
-                    {
-                        Id = student.Id,
-                        FirstName = student.FirstName,
-                        LastName = student.LastName,
-                        DOB = student.DOB,
-                    };
-                   Student studentCheck = Students.Find(s => s.Id == newStudent.Id);
-                    if(studentCheck == null)
-                    {
-                        Students.Add(newStudent);
-                        return Request.CreateResponse(HttpStatusCode.OK, newStudent);
-                    }
-                    else
-                    {
-                        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Student with an Id: {newStudent.Id} already exists.");
-                    }                
-                }
-                else
+                if (student == null)
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to create new student");
                 }
-                            
+                Student studentCheck = Students.Find(s => s.Id == student.Id);
+                if (studentCheck != null)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Student with an Id: {student.Id} already exists.");
+                }
+
+                Student newStudent = new Student
+                {
+                      Id = student.Id,
+                      FirstName = student.FirstName,
+                      LastName = student.LastName,
+                      DOB = student.DOB,
+                 };
+                 Students.Add(newStudent);
+                 return Request.CreateResponse(HttpStatusCode.OK, newStudent);
+                
+                           
             }
             catch (Exception)
             {
@@ -150,7 +146,7 @@ namespace SchoolMS.WebApi.Controllers
         }
 
         [HttpPut]
-        public HttpResponseMessage UpdateStudent(int id, Student student)
+        public HttpResponseMessage UpdateStudent(int id, [FromUri] Student student)
         {
             try
             {
@@ -163,15 +159,14 @@ namespace SchoolMS.WebApi.Controllers
 
                     return Request.CreateResponse(HttpStatusCode.OK, Students);
                 }
-                else
-                {
+
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to find a student with an Id: {id}");
-                }
             }
             catch (Exception)
             {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting UpdateStudent({id},student)");
             }
-            return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting UpdateStudent({id},student)");
+           
         }
     }
 }
