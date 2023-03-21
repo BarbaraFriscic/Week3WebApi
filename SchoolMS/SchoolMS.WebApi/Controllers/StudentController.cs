@@ -108,26 +108,51 @@ namespace SchoolMS.WebApi.Controllers
             }
             catch (Exception)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting DeleteStudent({id})\"");
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting DeleteStudent({id})");
             }
 
         }
 
         [HttpPost]
-        public List<Student> CreateStudent([FromBody] Student student)
+        public HttpResponseMessage CreateNewStudent(Student student)
         {
             try
             {
-                Students.Add(student);
+                if(student != null)
+                {
+                    Student newStudent = new Student
+                    {
+                        Id = student.Id,
+                        FirstName = student.FirstName,
+                        LastName = student.LastName,
+                        DOB = student.DOB,
+                    };
+                   Student studentCheck = Students.Find(s => s.Id == newStudent.Id);
+                    if(studentCheck == null)
+                    {
+                        Students.Add(newStudent);
+                        return Request.CreateResponse(HttpStatusCode.OK, newStudent);
+                    }
+                    else
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Student with an Id: {newStudent.Id} already exists.");
+                    }                
+                }
+                else
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to create new student");
+                }
+                            
             }
             catch (Exception)
             {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting CreateNewStudent(Student student)");
             }
-            return Students;
+           
         }
 
         [HttpPut]
-        public List<Student> UpdateStudent(int id)
+        public List<Student> UpdateStudent(int id, Student student)
         {
             try
             {
