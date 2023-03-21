@@ -104,13 +104,11 @@ namespace SchoolMS.WebApi.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"No Student with an Id:{id}. Unable to Delete.");
                 }
-
             }
             catch (Exception)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting DeleteStudent({id})");
             }
-
         }
 
         [HttpPost]
@@ -152,19 +150,28 @@ namespace SchoolMS.WebApi.Controllers
         }
 
         [HttpPut]
-        public List<Student> UpdateStudent(int id, Student student)
+        public HttpResponseMessage UpdateStudent(int id, Student student)
         {
             try
             {
                 Student studentToUpdate = Students.Find(s => s.Id == id);
-                studentToUpdate.FirstName = "novoIme";
-                studentToUpdate.LastName = "novoPrezime";
-                studentToUpdate.DOB = DateTime.Today.AddDays(1);
+                if(studentToUpdate != null)
+                {
+                    studentToUpdate.FirstName = student.FirstName;
+                    studentToUpdate.LastName = student.LastName;
+                    studentToUpdate.DOB = student.DOB;
+
+                    return Request.CreateResponse(HttpStatusCode.OK, Students);
+                }
+                else
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to find a student with an Id: {id}");
+                }
             }
             catch (Exception)
             {
             }
-            return Students;
+            return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting UpdateStudent({id},student)");
         }
     }
 }
