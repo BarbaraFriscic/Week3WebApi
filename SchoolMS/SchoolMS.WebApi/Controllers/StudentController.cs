@@ -116,9 +116,9 @@ namespace SchoolMS.WebApi.Controllers
         {
             try
             {
-                if (student == null)
+                if (!ModelState.IsValid)
                 {
-                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to create new student");
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
                 }
                 Student studentCheck = students.Find(s => s.Id == student.Id);
                 if (studentCheck != null)
@@ -132,6 +132,7 @@ namespace SchoolMS.WebApi.Controllers
                       FirstName = student.FirstName,
                       LastName = student.LastName,
                       DOB = student.DOB,
+                      SchoolId = student.SchoolId
                  };
                  students.Add(newStudent);
                  return Request.CreateResponse(HttpStatusCode.OK, newStudent);                               
@@ -144,8 +145,8 @@ namespace SchoolMS.WebApi.Controllers
         }
 
         [HttpPut]
-        public HttpResponseMessage UpdateStudent(int id, [FromUri] Student student)
-        {
+        public HttpResponseMessage UpdateStudent([FromBody]int id, [FromUri] Student student)
+        {  
             try
             {
                 Student studentToUpdate = students.Find(s => s.Id == id);
@@ -154,7 +155,8 @@ namespace SchoolMS.WebApi.Controllers
                     studentToUpdate.FirstName = string.IsNullOrWhiteSpace(student.FirstName)?studentToUpdate.FirstName : student.FirstName;
                     studentToUpdate.LastName = string.IsNullOrWhiteSpace(student.LastName)?studentToUpdate.LastName : student.LastName;
                     studentToUpdate.DOB = Convert.ToDateTime(string.IsNullOrWhiteSpace(student.DOB.ToString())?studentToUpdate.DOB : student.DOB);
-
+                    studentToUpdate.Address = studentToUpdate.Address;
+                    studentToUpdate.SchoolId = Convert.ToInt32(string.IsNullOrWhiteSpace(student.SchoolId.ToString()) ? studentToUpdate.SchoolId : student.SchoolId);
                     return Request.CreateResponse(HttpStatusCode.OK, students);
                 }
 
