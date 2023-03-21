@@ -10,12 +10,12 @@ namespace SchoolMS.WebApi.Controllers
 {
     public class StudentController : ApiController
     {
-        public static List<School> Schools = new List<School>
+        public static List<School> schools = new List<School>
         {
             new School { Id = 1, Name = "OŠ Retfala" },
             new School { Id = 2, Name = "OŠ Višnjevac" }
         };
-        public static List<Student> Students = new List<Student>
+        public static List<Student> students = new List<Student>
         {
             new Student
         {
@@ -51,7 +51,7 @@ namespace SchoolMS.WebApi.Controllers
         {
             try
             {
-                List<Student> studentsToReturn = Students.ToList();
+                List<Student> studentsToReturn = students.ToList();
                 if (studentsToReturn != null)
                 {
                     return Request.CreateResponse(HttpStatusCode.OK, studentsToReturn);
@@ -73,7 +73,7 @@ namespace SchoolMS.WebApi.Controllers
             try
             {
                 // Student studentToReturn = Students.Find(s => s.Id == id);
-                Student studentToReturn = Students.Where(s => s.Id == id).FirstOrDefault();
+                Student studentToReturn = students.Where(s => s.Id == id).FirstOrDefault();
                 if (studentToReturn != null)
                 {
                     return Request.CreateResponse(HttpStatusCode.OK, studentToReturn);
@@ -94,11 +94,11 @@ namespace SchoolMS.WebApi.Controllers
             try
             {
                 //Student studentToDelete = Students.Find(s => s.Id == id);
-                Student studentToDelete = Students.Where(s => s.Id == id).FirstOrDefault();
+                Student studentToDelete = students.Where(s => s.Id == id).FirstOrDefault();
                 if(studentToDelete != null)
                 {
-                    Students.Remove(studentToDelete);
-                    return Request.CreateResponse(HttpStatusCode.OK, Students);
+                    students.Remove(studentToDelete);
+                    return Request.CreateResponse(HttpStatusCode.OK, students);
                 }
                 else
                 {
@@ -120,7 +120,7 @@ namespace SchoolMS.WebApi.Controllers
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to create new student");
                 }
-                Student studentCheck = Students.Find(s => s.Id == student.Id);
+                Student studentCheck = students.Find(s => s.Id == student.Id);
                 if (studentCheck != null)
                 {
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Student with an Id: {student.Id} already exists.");
@@ -133,10 +133,8 @@ namespace SchoolMS.WebApi.Controllers
                       LastName = student.LastName,
                       DOB = student.DOB,
                  };
-                 Students.Add(newStudent);
-                 return Request.CreateResponse(HttpStatusCode.OK, newStudent);
-                
-                           
+                 students.Add(newStudent);
+                 return Request.CreateResponse(HttpStatusCode.OK, newStudent);                               
             }
             catch (Exception)
             {
@@ -150,14 +148,14 @@ namespace SchoolMS.WebApi.Controllers
         {
             try
             {
-                Student studentToUpdate = Students.Find(s => s.Id == id);
+                Student studentToUpdate = students.Find(s => s.Id == id);
                 if(studentToUpdate != null)
                 {
-                    studentToUpdate.FirstName = student.FirstName;
-                    studentToUpdate.LastName = student.LastName;
-                    studentToUpdate.DOB = student.DOB;
+                    studentToUpdate.FirstName = string.IsNullOrWhiteSpace(student.FirstName)?studentToUpdate.FirstName : student.FirstName;
+                    studentToUpdate.LastName = string.IsNullOrWhiteSpace(student.LastName)?studentToUpdate.LastName : student.LastName;
+                    studentToUpdate.DOB = Convert.ToDateTime(string.IsNullOrWhiteSpace(student.DOB.ToString())?studentToUpdate.DOB : student.DOB);
 
-                    return Request.CreateResponse(HttpStatusCode.OK, Students);
+                    return Request.CreateResponse(HttpStatusCode.OK, students);
                 }
 
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to find a student with an Id: {id}");
