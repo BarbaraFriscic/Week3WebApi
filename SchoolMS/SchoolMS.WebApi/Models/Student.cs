@@ -30,7 +30,7 @@ namespace SchoolMS.WebApi.Models
         [Required(ErrorMessage = "Date of birth is required")]
         public Guid SchoolId { get; set; }
 
-        public decimal Average { get; set; }
+        public decimal? Average { get; set; }
 
         public override string ToString()
         {

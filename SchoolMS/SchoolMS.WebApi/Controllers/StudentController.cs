@@ -2,6 +2,7 @@
 using SchoolMS.WebApi.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
@@ -74,7 +75,7 @@ namespace SchoolMS.WebApi.Controllers
                             student.DOB = reader.GetDateTime(3);
                             student.Address = reader.GetString(4);
                             student.SchoolId = reader.GetGuid(5);
-                            student.Average = reader.IsDBNull(6)?student.Average : reader.GetDecimal(6);
+                            student.Average = reader.IsDBNull(6)?student.Average: reader.GetDecimal(6);
 
                             students.Add(student);
                         }
@@ -152,14 +153,12 @@ namespace SchoolMS.WebApi.Controllers
                     else
                     {
                         return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to delete Student with and Id:{id}");
-                    }
-                    
+                    }                  
                 }
             }
             catch (Exception)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting DeleteStudent({id})");
-
             }
         }
 
@@ -198,29 +197,77 @@ namespace SchoolMS.WebApi.Controllers
             }
         }
 
-        //[HttpPut]
-        //public HttpResponseMessage UpdateStudent([FromBody]int id, [FromUri] Student student)
-        //{  
-        //    try
-        //    {
-        //        Student studentToUpdate = students.Find(s => s.Id == id);
-        //        if(studentToUpdate != null)
-        //        {
-        //            studentToUpdate.FirstName = string.IsNullOrWhiteSpace(student.FirstName)?studentToUpdate.FirstName : student.FirstName;
-        //            studentToUpdate.LastName = string.IsNullOrWhiteSpace(student.LastName)?studentToUpdate.LastName : student.LastName;
-        //            studentToUpdate.DOB = Convert.ToDateTime(string.IsNullOrWhiteSpace(student.DOB.ToString())?studentToUpdate.DOB : student.DOB);
-        //            studentToUpdate.Address = studentToUpdate.Address;
-        //            studentToUpdate.SchoolId = Convert.ToInt32(string.IsNullOrWhiteSpace(student.SchoolId.ToString()) ? studentToUpdate.SchoolId : student.SchoolId);
-        //            return Request.CreateResponse(HttpStatusCode.OK, students);
-        //        }
+        [HttpPut]
+        public HttpResponseMessage UpdateStudent(Guid id, Student student)
+        {
+            try
+            {
+                SqlConnection connection = new SqlConnection(connectionString);
+                using(connection)
+                {
+                    SqlCommand commandSelect = new SqlCommand("select * from Student where Id=@id", connection);
+                    commandSelect.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    SqlDataReader reader = commandSelect.ExecuteReader();
+                    Student currentStudent = new Student();
+                    if (!reader.HasRows)
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"No student with Id: {id} to update.");
+                    }
+                    reader.Read();
 
-        //            return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to find a student with an Id: {id}");
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting UpdateStudent({id},student)");
-        //    }
+                    currentStudent.Id = reader.GetGuid(0);
+                    currentStudent.FirstName = reader.GetString(1);
+                    currentStudent.LastName = reader.GetString(2);
+                    currentStudent.DOB = reader.GetDateTime(3);
+                    currentStudent.Address = reader.GetString(4);
+                    currentStudent.SchoolId = reader.GetGuid(5);
+                    currentStudent.Average = reader.IsDBNull(6) ? student.Average : reader.GetDecimal(6);
+                    reader.Close();
+                    SqlCommand commandEdit = new SqlCommand("update Student set FirstName=@firstName, LastName=@lastName, Address=@address, SchoolId=@schoolId, Average=@average where Id=@id", connection);
+                    commandEdit.Parameters.AddWithValue("@id", id);
+                    commandEdit.Parameters.AddWithValue("@firstName", string.IsNullOrWhiteSpace(student.FirstName)? currentStudent.FirstName : student.FirstName);
+                    commandEdit.Parameters.AddWithValue("lastName", string.IsNullOrWhiteSpace(student.LastName) ? currentStudent.LastName : student.LastName);
+                    commandEdit.Parameters.AddWithValue("@dob", Convert.ToDateTime(string.IsNullOrWhiteSpace(student.DOB.ToString()) ? currentStudent.DOB : student.DOB));
+                    commandEdit.Parameters.AddWithValue("@address", string.IsNullOrWhiteSpace(student.Address) ? currentStudent.Address : student.Address);
+                    commandEdit.Parameters.AddWithValue("@schoolId", Guid.Parse(string.IsNullOrWhiteSpace(student.SchoolId.ToString())? currentStudent.SchoolId.ToString() : student.SchoolId.ToString()));
+                    commandEdit.Parameters.AddWithValue("@average", Convert.ToDecimal(string.IsNullOrWhiteSpace(student.Average.ToString()) ? currentStudent.Average : student.Average));
+                    int numberOfAffectedRows = commandEdit.ExecuteNonQuery();
+                    if(numberOfAffectedRows > 0)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK, student);
+                    }
+                    else
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Unable to update Student with an Id: {id}");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting UpdateStudent({id},student)");
+            }
 
-        //}
+            //try
+            //{
+            //    Student studentToUpdate = students.Find(s => s.Id == id);
+            //    if (studentToUpdate != null)
+            //    {
+            //        studentToUpdate.FirstName = string.IsNullOrWhiteSpace(student.FirstName) ? studentToUpdate.FirstName : student.FirstName;
+            //        studentToUpdate.LastName = string.IsNullOrWhiteSpace(student.LastName) ? studentToUpdate.LastName : student.LastName;
+            //        studentToUpdate.DOB = Convert.ToDateTime(string.IsNullOrWhiteSpace(student.DOB.ToString()) ? studentToUpdate.DOB : student.DOB);
+            //        studentToUpdate.Address = studentToUpdate.Address;
+            //        studentToUpdate.SchoolId = Convert.ToInt32(string.IsNullOrWhiteSpace(student.SchoolId.ToString()) ? studentToUpdate.SchoolId : student.SchoolId);
+            //        return Request.CreateResponse(HttpStatusCode.OK, students);
+            //    }
+
+            //    return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to find a student with an Id: {id}");
+            //}
+            //catch (Exception)
+            //{
+            //    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting UpdateStudent({id},student)");
+            //}
+
+        }
     }
 }
