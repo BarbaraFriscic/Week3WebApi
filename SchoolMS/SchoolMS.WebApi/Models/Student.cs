@@ -10,7 +10,7 @@ namespace SchoolMS.WebApi.Models
     public class Student
     {
         [Required(ErrorMessage = "Id is required")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage ="First Name is required")]
         [MinLength(2, ErrorMessage ="Minimal length is 2 characters")]
@@ -20,11 +20,17 @@ namespace SchoolMS.WebApi.Models
         [MinLength(2, ErrorMessage = "Minimal length is 2 characters")]
         public string LastName { get; set; }
 
+        [Required(ErrorMessage = "Date of birth is required")]
         public DateTime DOB { get; set; }
 
-        public Address Address { get; set; }
+        [Required(ErrorMessage = "Date of birth is required")]
+        [MinLength(2, ErrorMessage = "Minimal length is 2 characters")]
+        public string Address { get; set; }
 
-        public int SchoolId { get; set; }
+        [Required(ErrorMessage = "Date of birth is required")]
+        public Guid SchoolId { get; set; }
+
+        public decimal Average { get; set; }
 
         public override string ToString()
         {
