@@ -133,28 +133,35 @@ namespace SchoolMS.WebApi.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting GetStudent({id})\")");             
             }        
         }
-        //[HttpDelete]
-        //public HttpResponseMessage DeleteStudent(int id)
-        //{
-        //    try
-        //    {
-        //        //Student studentToDelete = Students.Find(s => s.Id == id);
-        //        Student studentToDelete = students.Where(s => s.Id == id).FirstOrDefault();
-        //        if(studentToDelete != null)
-        //        {
-        //            students.Remove(studentToDelete);
-        //            return Request.CreateResponse(HttpStatusCode.OK, students);
-        //        }
-        //        else
-        //        {
-        //            return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"No Student with an Id:{id}. Unable to Delete.");
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting DeleteStudent({id})");
-        //    }
-        //}
+        [HttpDelete]
+        public HttpResponseMessage DeleteStudent(Guid id)
+        {
+            try
+            {
+                SqlConnection connection = new SqlConnection(connectionString);
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("delete from Student where Id=@id", connection);
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    int numberOfAffectedRows = command.ExecuteNonQuery();
+                    if (numberOfAffectedRows > 0)
+                    {                      
+                        return Request.CreateResponse(HttpStatusCode.OK, $"Successfully deleted Student with an Id: {id}");
+                    }
+                    else
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Unable to delete Student with and Id:{id}");
+                    }
+                    
+                }
+            }
+            catch (Exception)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting DeleteStudent({id})");
+
+            }
+        }
 
         [HttpPost]
         public HttpResponseMessage CreateNewStudent(Student student)
