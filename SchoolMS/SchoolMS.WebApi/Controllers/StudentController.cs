@@ -1,4 +1,5 @@
-﻿using SchoolMS.WebApi.Models;
+﻿using Microsoft.Ajax.Utilities;
+using SchoolMS.WebApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -46,7 +47,7 @@ namespace SchoolMS.WebApi.Controllers
         //    SchoolId = 2
         //    }
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
-
+        //SqlConnection connection = new SqlConnection(connectionString);
         [HttpGet]
         [Route("api/student/get-all")]
         public HttpResponseMessage GetStudents()
@@ -73,6 +74,7 @@ namespace SchoolMS.WebApi.Controllers
                             student.DOB = reader.GetDateTime(3);
                             student.Address = reader.GetString(4);
                             student.SchoolId = reader.GetGuid(5);
+                            student.Average = reader.IsDBNull(6)?student.Average : reader.GetDecimal(6);
 
                             students.Add(student);
                         }
@@ -81,7 +83,7 @@ namespace SchoolMS.WebApi.Controllers
                     }
                     else
                     {
-                        return Request.CreateResponse(HttpStatusCode.NotFound, "No records of Students found");
+                        return Request.CreateResponse(HttpStatusCode.NotFound, "No record of Students found");
                     }
                 }
             }
@@ -115,6 +117,7 @@ namespace SchoolMS.WebApi.Controllers
                         student.DOB = reader.GetDateTime(3);
                         student.Address = reader.GetString(4);
                         student.SchoolId = reader.GetGuid(5);
+                        student.Average = reader.IsDBNull(6) ? student.Average : reader.GetDecimal(6);
 
                         reader.Close();
                         return Request.CreateResponse(HttpStatusCode.OK, student);
@@ -153,38 +156,40 @@ namespace SchoolMS.WebApi.Controllers
         //    }
         //}
 
-        //[HttpPost]
-        //public HttpResponseMessage CreateNewStudent(Student student)
-        //{
-        //    try
-        //    {
-        //        if (!ModelState.IsValid)
-        //        {
-        //            return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
-        //        }
-        //        Student studentCheck = students.Find(s => s.Id == student.Id);
-        //        if (studentCheck != null)
-        //        {
-        //            return Request.CreateErrorResponse(HttpStatusCode.BadRequest, $"Student with an Id: {student.Id} already exists.");
-        //        }
+        [HttpPost]
+        public HttpResponseMessage CreateNewStudent(Student student)
+        {
+            try
+            {
+                SqlConnection connection = new SqlConnection(connectionString);
+                using(connection)
+                {                  
+                    SqlCommand command = new SqlCommand("insert into Student values(@id, @firstName, @lastName, @dob, @address, @schoolId, @average)", connection);
+                    command.Parameters.AddWithValue("@id", Guid.NewGuid());
+                    command.Parameters.AddWithValue("@firstName", student.FirstName);
+                    command.Parameters.AddWithValue("@lastName", student.LastName);
+                    command.Parameters.AddWithValue("@dob", student.DOB);
+                    command.Parameters.AddWithValue("@address", student.Address);
+                    command.Parameters.AddWithValue("@schoolId", student.SchoolId);
+                    command.Parameters.AddWithValue("@average", (decimal)student.Average);
 
-        //        Student newStudent = new Student
-        //        {
-        //              Id = student.Id,
-        //              FirstName = student.FirstName,
-        //              LastName = student.LastName,
-        //              DOB = student.DOB,
-        //              SchoolId = student.SchoolId
-        //         };
-        //         students.Add(newStudent);
-        //         return Request.CreateResponse(HttpStatusCode.OK, newStudent);                               
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting CreateNewStudent(Student student)");
-        //    }
-
-        //}
+                    connection.Open();
+                    int numberOfAffectedRows = command.ExecuteNonQuery();
+                    if(numberOfAffectedRows > 0)
+                    {                        
+                        return Request.CreateResponse(HttpStatusCode.OK, "New Student created successfully");
+                    }
+                    else
+                    {
+                        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to create new Student");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"An error occured while attempting CreateNewStudent(Student student)");
+            }
+        }
 
         //[HttpPut]
         //public HttpResponseMessage UpdateStudent([FromBody]int id, [FromUri] Student student)
