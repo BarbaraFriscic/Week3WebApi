@@ -306,6 +306,20 @@
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SchoolMS.Model\SchoolMS.Model.csproj">
+      <Project>{433167DA-DF84-4696-A85E-D95F08EC3E54}</Project>
+      <Name>SchoolMS.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SchoolMS.Service.Common\SchoolMS.Service.Common.csproj">
+      <Project>{6345EDC5-51EB-402C-84FE-5C519944218F}</Project>
+      <Name>SchoolMS.Service.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SchoolMS.Service\SchoolMS.Service.csproj">
+      <Project>{4B238063-AB81-4951-B912-3FB33737D2D7}</Project>
+      <Name>SchoolMS.Service</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
