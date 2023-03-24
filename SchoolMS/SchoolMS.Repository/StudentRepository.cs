@@ -15,7 +15,7 @@ namespace SchoolMS.Repository
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
 
-        public List<StudentModel> GetAllStudents()
+        public async Task<List<StudentModel>> GetAllStudents()
         {
             try
             {
@@ -25,7 +25,7 @@ namespace SchoolMS.Repository
                     SqlCommand commmand = new SqlCommand("select * from Student", connection);
                     connection.Open();
 
-                    SqlDataReader reader = commmand.ExecuteReader();
+                    SqlDataReader reader = await commmand.ExecuteReaderAsync();
 
                     List<StudentModel> students = new List<StudentModel>();
                     if (reader.HasRows)
@@ -58,7 +58,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public StudentModel GetStudent(Guid id)
+        public async Task<StudentModel> GetStudent(Guid id)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace SchoolMS.Repository
                     SqlCommand command = new SqlCommand("select * from Student where Id=@id", connection);
                     command.Parameters.AddWithValue("@id", id);
                     connection.Open();
-                    SqlDataReader reader = command.ExecuteReader();
+                    SqlDataReader reader = await command.ExecuteReaderAsync();
 
                     StudentModel student = new StudentModel();
                     if (reader.HasRows)
@@ -97,7 +97,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public bool AddNewStudent(StudentModel student)
+        public async Task<bool> AddNewStudent(StudentModel student)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace SchoolMS.Repository
                     command.Parameters.AddWithValue("@average", (decimal?)student.Average ?? Convert.DBNull  );
 
                     connection.Open();
-                    int numberOfAffectedRows = command.ExecuteNonQuery();
+                    int numberOfAffectedRows = await command.ExecuteNonQueryAsync();
                     if (numberOfAffectedRows > 0)
                     {
                         return true;
@@ -131,7 +131,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public bool EditStudent(Guid id, StudentModel student)
+        public async Task<bool> EditStudent(Guid id, StudentModel student)
         {
             try
             {
@@ -139,17 +139,17 @@ namespace SchoolMS.Repository
                 using (connection)
                 {
 
-                    SqlCommand commandEdit = new SqlCommand("update Student set FirstName=@firstName, LastName=@lastName, Address=@address, SchoolId=@schoolId, Average=@average where Id=@id", connection);
+                    SqlCommand commandEdit = new SqlCommand("update Student set FirstName=@firstName, LastName=@lastName, DOB=@dob, Address=@address, SchoolId=@schoolId, Average=@average where Id=@id", connection);
                     commandEdit.Parameters.AddWithValue("@id", id);
                     commandEdit.Parameters.AddWithValue("@firstName", student.FirstName);
                     commandEdit.Parameters.AddWithValue("lastName", student.LastName);
-                    commandEdit.Parameters.AddWithValue("@dob", student.DOB.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                    commandEdit.Parameters.AddWithValue("@dob", student.DOB);
                     commandEdit.Parameters.AddWithValue("@address", student.Address);
                     commandEdit.Parameters.AddWithValue("@schoolId", student.SchoolId);
                     commandEdit.Parameters.AddWithValue("@average", (decimal)student.Average == default ? Convert.DBNull : (decimal)student.Average );
 
                     connection.Open();
-                    int numberOfAffectedRows = commandEdit.ExecuteNonQuery();
+                    int numberOfAffectedRows = await commandEdit.ExecuteNonQueryAsync();
                     if (numberOfAffectedRows > 0)
                     {
                         return true;
@@ -166,7 +166,7 @@ namespace SchoolMS.Repository
             }     
         }
 
-        public bool DeleteStudent(Guid id)
+        public async Task<bool> DeleteStudent(Guid id)
         {
             try
             {
@@ -176,7 +176,7 @@ namespace SchoolMS.Repository
                     SqlCommand command = new SqlCommand("delete from Student where Id=@id", connection);
                     command.Parameters.AddWithValue("@id", id);
                     connection.Open();
-                    int numberOfAffectedRows = command.ExecuteNonQuery();
+                    int numberOfAffectedRows = await command.ExecuteNonQueryAsync();
                     if (numberOfAffectedRows > 0)
                     {
                         return true;

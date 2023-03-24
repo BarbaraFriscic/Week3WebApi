@@ -14,35 +14,36 @@ namespace SchoolMS.Service
     {
         IStudentRepository _studentRepository = new StudentRepository();
 
-        public List<StudentModel> GetAllStudents()
+        public async Task<List<StudentModel>> GetAllStudents()
         {
-            List<StudentModel> students = _studentRepository.GetAllStudents();
+            List<StudentModel> students = await _studentRepository.GetAllStudents();
 
             return students;
         }
 
-        public StudentModel GetStudent(Guid id)
+        public async Task<StudentModel> GetStudent(Guid id)
         {
-            StudentModel studentModel= _studentRepository.GetStudent(id);
+            StudentModel studentModel= await _studentRepository.GetStudent(id);
 
             return studentModel;
         }
 
-        public bool AddNewStudent(StudentModel student)
+        public async Task<bool> AddNewStudent(StudentModel student)
         {
-            bool isSuccess = _studentRepository.AddNewStudent(student);
-            return isSuccess;
+            bool isAdded = await _studentRepository.AddNewStudent(student);
+            return isAdded;
         }
 
-        public bool EditStudent(Guid id, StudentModel student)
+        public async Task<bool> EditStudent(Guid id, StudentModel student)
         {
-            StudentModel studentCheck = _studentRepository.GetStudent(id);
+            StudentModel studentCheck = await _studentRepository.GetStudent(id);
             if(studentCheck == null)
             {
                 return false;
             }
             StudentModel studentToEdit = new StudentModel
             {
+                Id = id,
                 FirstName = student.FirstName == default ? studentCheck.FirstName : student.FirstName,
                 LastName = student.LastName == default ? studentCheck.LastName : student.LastName,
                 DOB = student.DOB == default ? studentCheck.DOB : student.DOB,
@@ -51,14 +52,19 @@ namespace SchoolMS.Service
                 Average = student.Average == default ? studentCheck.Average == null ? default : (decimal)studentCheck.Average : (decimal)student.Average
             };
 
-            bool isSuccess = _studentRepository.EditStudent(id, studentToEdit);
-            return isSuccess;
+            bool isEdited = await _studentRepository.EditStudent(id, studentToEdit);
+            return isEdited;
         }
 
-        public bool DeleteStudent(Guid id)
+        public async Task<bool> DeleteStudent(Guid id)
         {
-            bool isSuccess = _studentRepository.DeleteStudent(id);
-            return isSuccess;
+            StudentModel studentCheck = await _studentRepository.GetStudent(id);
+            if(studentCheck == null)
+            {
+                return false;
+            }
+            bool isDeleted = await _studentRepository.DeleteStudent(id);
+            return isDeleted;
         }
     }
 }

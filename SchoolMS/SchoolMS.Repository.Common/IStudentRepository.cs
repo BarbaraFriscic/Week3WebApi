@@ -9,10 +9,10 @@ namespace SchoolMS.Repository.Common
 {
     public interface IStudentRepository
     {
-        List<StudentModel> GetAllStudents();
-        StudentModel GetStudent(Guid id);
-        bool AddNewStudent(StudentModel student);
-        bool EditStudent(Guid id,  StudentModel student);
-        bool DeleteStudent(Guid id);
+        Task<List<StudentModel>> GetAllStudents();
+        Task<StudentModel> GetStudent(Guid id);
+        Task<bool> AddNewStudent(StudentModel student);
+        Task<bool> EditStudent(Guid id,  StudentModel student);
+        Task<bool> DeleteStudent(Guid id);
     }
 }

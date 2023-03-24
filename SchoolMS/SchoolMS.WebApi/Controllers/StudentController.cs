@@ -5,11 +5,13 @@ using SchoolMS.Service.Common;
 using SchoolMS.WebApi.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace SchoolMS.WebApi.Controllers
@@ -21,39 +23,56 @@ namespace SchoolMS.WebApi.Controllers
 
         [HttpGet]
         [Route("api/student/get-all")]
-        public HttpResponseMessage GetAllStudents()
+        public async Task<HttpResponseMessage> GetAllStudents()
         {
-            List<StudentModel> students = _studentService.GetAllStudents();
-            if(students == null)
+            List<StudentModel> students = await _studentService.GetAllStudents();
+            List<StudentRest> mappedStudents = new List<StudentRest>();
+            if (students == null)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No records of Students found.");
             }
-            return Request.CreateResponse(HttpStatusCode.OK, students);
-            
+            foreach (StudentModel student in students)
+            {
+                StudentRest mappedStudent = new StudentRest();
+                mappedStudent.FirstName = student.FirstName;
+                mappedStudent.LastName = student.LastName;
+
+                mappedStudents.Add(mappedStudent);
+            }
+            return Request.CreateResponse(HttpStatusCode.OK, mappedStudents);
         }
 
         [HttpGet]
         //[Route("api/student/get-by-id/{id}")]
-        public HttpResponseMessage GetStudent(Guid id)
+        public async Task<HttpResponseMessage> GetStudent(Guid id)
         {
-            StudentModel student = _studentService.GetStudent(id);
-            if(student == null)
+            StudentModel student = await _studentService.GetStudent(id);
+            if (student == null)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Unable to find that Student.");
             }
-            return Request.CreateResponse(HttpStatusCode.OK, student);
+            StudentRest studentRest = new StudentRest();
+            studentRest.FirstName = student.FirstName;
+            studentRest.LastName = student.LastName;
+            return Request.CreateResponse(HttpStatusCode.OK, studentRest);
         }
 
         [HttpPost]
-        public HttpResponseMessage AddNewStudent(StudentModel student)
+        public async Task<HttpResponseMessage> AddNewStudent(StudentPostRest studentRest)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
             }
+            StudentModel studentModel = new StudentModel();
+            studentModel.FirstName = studentRest.FirstName;
+            studentModel.LastName = studentRest.LastName;
+            studentModel.Address = studentRest.Address;
+            studentModel.DOB = studentRest.DOB;
+            studentModel.SchoolId = studentRest.SchoolId;
 
-            bool isSuccess = _studentService.AddNewStudent(student);
-            if(!isSuccess)
+            bool isAdded = await _studentService.AddNewStudent(studentModel);
+            if (!isAdded)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to add new Student.");
             }
@@ -61,26 +80,59 @@ namespace SchoolMS.WebApi.Controllers
         }
 
         [HttpDelete]
-        public HttpResponseMessage DeleteStudent(Guid id)
+        public async Task<HttpResponseMessage> DeleteStudent(Guid id)
         {
-            bool isSuccess = _studentService.DeleteStudent(id);
-            if(!isSuccess)
+            bool isDeleted = await _studentService.DeleteStudent(id);
+            if (!isDeleted)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Unable to delete Student.");
             }
             return Request.CreateResponse(HttpStatusCode.OK, "Student deleted successfully.");
         }
-        
+
 
         [HttpPut]
-        public HttpResponseMessage UpdateStudent(Guid id, StudentModel student)
+        public async Task<HttpResponseMessage> UpdateStudent(Guid id, StudentPutRest studentRest)
         {
-            bool isSuccess = _studentService.EditStudent(id, student);
-            if(!isSuccess)
+            StudentModel studentModel = new StudentModel();
+            studentModel.FirstName = studentRest.FirstName;
+            studentModel.LastName = studentRest.LastName;
+            studentModel.Address = studentRest.Address;
+            
+            bool isEdited = await _studentService.EditStudent(id, studentModel);
+            if (!isEdited)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to update Student.");
             }
             return Request.CreateResponse(HttpStatusCode.OK, "Student updated successfully.");
+        }
+
+        public class StudentPostRest
+        {
+            [Required(ErrorMessage = "First name is required")]
+            [MinLength(2, ErrorMessage = "Minimal length is 2 characters")]
+            public string FirstName { get; set; }
+
+            [Required(ErrorMessage = "Last name is required")]
+            [MinLength(2, ErrorMessage = "Minimal length is 2 characters")]
+            public string LastName { get; set; }
+
+            [Required(ErrorMessage = "Date of birth is required")]
+            public DateTime DOB { get; set; }
+
+            [Required(ErrorMessage = "Address is required")]
+            [MinLength(2, ErrorMessage = "Minimal length is 2 characters")]
+            public string Address { get; set; }
+
+            [Required(ErrorMessage = "School Id is required")]
+            public Guid SchoolId { get; set; }
+        }
+
+        public class StudentPutRest
+        {
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string Address { get; set; }
         }
     }
 }
