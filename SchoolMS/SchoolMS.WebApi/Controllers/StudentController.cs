@@ -19,13 +19,18 @@ namespace SchoolMS.WebApi.Controllers
     public class StudentController : ApiController
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
-        IStudentService _studentService = new StudentService();
+        IStudentService StudentService { get; set; }
+
+        public StudentController(IStudentService studentService)
+        {
+            StudentService = studentService;
+        }
 
         [HttpGet]
         [Route("api/student/get-all")]
         public async Task<HttpResponseMessage> GetAllStudents()
         {
-            List<StudentModel> students = await _studentService.GetAllStudents();
+            List<StudentModel> students = await StudentService.GetAllStudents();
             List<StudentRest> mappedStudents = new List<StudentRest>();
             if (students == null)
             {
@@ -46,7 +51,7 @@ namespace SchoolMS.WebApi.Controllers
         //[Route("api/student/get-by-id/{id}")]
         public async Task<HttpResponseMessage> GetStudent(Guid id)
         {
-            StudentModel student = await _studentService.GetStudent(id);
+            StudentModel student = await StudentService.GetStudent(id);
             if (student == null)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Unable to find that Student.");
@@ -71,7 +76,7 @@ namespace SchoolMS.WebApi.Controllers
             studentModel.DOB = studentRest.DOB;
             studentModel.SchoolId = studentRest.SchoolId;
 
-            bool isAdded = await _studentService.AddNewStudent(studentModel);
+            bool isAdded = await StudentService.AddNewStudent(studentModel);
             if (!isAdded)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to add new Student.");
@@ -82,7 +87,7 @@ namespace SchoolMS.WebApi.Controllers
         [HttpDelete]
         public async Task<HttpResponseMessage> DeleteStudent(Guid id)
         {
-            bool isDeleted = await _studentService.DeleteStudent(id);
+            bool isDeleted = await StudentService.DeleteStudent(id);
             if (!isDeleted)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Unable to delete Student.");
@@ -99,7 +104,7 @@ namespace SchoolMS.WebApi.Controllers
             studentModel.LastName = studentRest.LastName;
             studentModel.Address = studentRest.Address;
             
-            bool isEdited = await _studentService.EditStudent(id, studentModel);
+            bool isEdited = await StudentService.EditStudent(id, studentModel);
             if (!isEdited)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Unable to update Student.");
