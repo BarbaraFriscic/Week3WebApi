@@ -12,7 +12,7 @@ namespace SchoolMS.Service
 {
     public class StudentService : IStudentService
     {
-        IStudentRepository StudentRepository { get; set; }
+        protected IStudentRepository StudentRepository { get; set; }
 
         public StudentService(IStudentRepository studentRepository)
         {

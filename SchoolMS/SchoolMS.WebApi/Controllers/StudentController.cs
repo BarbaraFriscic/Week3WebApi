@@ -19,7 +19,7 @@ namespace SchoolMS.WebApi.Controllers
     public class StudentController : ApiController
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
-        IStudentService StudentService { get; set; }
+        protected IStudentService StudentService { get; set; }
 
         public StudentController(IStudentService studentService)
         {
