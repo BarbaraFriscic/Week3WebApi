@@ -12,31 +12,36 @@ namespace SchoolMS.Service
 {
     public class StudentService : IStudentService
     {
-        IStudentRepository _studentRepository = new StudentRepository();
+        protected IStudentRepository StudentRepository { get; set; }
+
+        public StudentService(IStudentRepository studentRepository)
+        {
+            StudentRepository = studentRepository;
+        }
 
         public async Task<List<StudentModel>> GetAllStudents()
         {
-            List<StudentModel> students = await _studentRepository.GetAllStudents();
+            List<StudentModel> students = await StudentRepository.GetAllStudents();
 
             return students;
         }
 
         public async Task<StudentModel> GetStudent(Guid id)
         {
-            StudentModel studentModel= await _studentRepository.GetStudent(id);
+            StudentModel studentModel= await StudentRepository.GetStudent(id);
 
             return studentModel;
         }
 
         public async Task<bool> AddNewStudent(StudentModel student)
         {
-            bool isAdded = await _studentRepository.AddNewStudent(student);
+            bool isAdded = await StudentRepository.AddNewStudent(student);
             return isAdded;
         }
 
         public async Task<bool> EditStudent(Guid id, StudentModel student)
         {
-            StudentModel studentCheck = await _studentRepository.GetStudent(id);
+            StudentModel studentCheck = await StudentRepository.GetStudent(id);
             if(studentCheck == null)
             {
                 return false;
@@ -52,18 +57,18 @@ namespace SchoolMS.Service
                 Average = student.Average == default ? studentCheck.Average == null ? default : (decimal)studentCheck.Average : (decimal)student.Average
             };
 
-            bool isEdited = await _studentRepository.EditStudent(id, studentToEdit);
+            bool isEdited = await StudentRepository.EditStudent(id, studentToEdit);
             return isEdited;
         }
 
         public async Task<bool> DeleteStudent(Guid id)
         {
-            StudentModel studentCheck = await _studentRepository.GetStudent(id);
+            StudentModel studentCheck = await StudentRepository.GetStudent(id);
             if(studentCheck == null)
             {
                 return false;
             }
-            bool isDeleted = await _studentRepository.DeleteStudent(id);
+            bool isDeleted = await StudentRepository.DeleteStudent(id);
             return isDeleted;
         }
     }
