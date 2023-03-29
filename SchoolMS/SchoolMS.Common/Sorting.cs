@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace SchoolMS.Common
 {
-    public class Class1
+    public class Sorting
     {
+        public string OrderBy { get; set; }
+        public string SortOrder { get; set; }
     }
 }

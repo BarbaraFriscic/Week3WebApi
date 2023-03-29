@@ -41,11 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StudentService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SchoolMS.Common\SchoolMS.Common.csproj">
+      <Project>{e3f3bde9-771a-4974-b558-5889b355abfb}</Project>
+      <Name>SchoolMS.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SchoolMS.Model\SchoolMS.Model.csproj">
       <Project>{433167DA-DF84-4696-A85E-D95F08EC3E54}</Project>
       <Name>SchoolMS.Model</Name>

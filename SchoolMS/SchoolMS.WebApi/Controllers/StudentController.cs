@@ -1,4 +1,5 @@
 ﻿using Microsoft.Ajax.Utilities;
+using SchoolMS.Common;
 using SchoolMS.Model;
 using SchoolMS.Service;
 using SchoolMS.Service.Common;
@@ -28,9 +29,25 @@ namespace SchoolMS.WebApi.Controllers
 
         [HttpGet]
         [Route("api/student/get-all")]
-        public async Task<HttpResponseMessage> GetAllStudents()
+        public async Task<HttpResponseMessage> GetAllStudents(Nullable<Guid> schoolId = null, int pageNumber =1, int pageSize = 5, string orderByColumn = "Id", string sortOrder = "asc")
         {
-            List<StudentModel> students = await StudentService.GetAllStudents();
+            Paging paging = new Paging
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            Sorting sorting = new Sorting
+            {
+                SortOrder = sortOrder,
+                OrderBy = orderByColumn
+            };
+            Filtering filtering = new Filtering
+            {
+                SchoolId = (Guid)(schoolId == null ? Guid.Empty : schoolId),
+            };
+
+            List<StudentModel> students = await StudentService.GetAllStudents(paging, sorting, filtering);
             List<StudentRest> mappedStudents = new List<StudentRest>();
             if (students == null)
             {
