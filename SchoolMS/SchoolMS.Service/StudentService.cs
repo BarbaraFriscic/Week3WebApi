@@ -20,9 +20,9 @@ namespace SchoolMS.Service
             StudentRepository = studentRepository;
         }
 
-        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting)
+        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, Filtering filtering)
         {
-            List<StudentModel> students = await StudentRepository.GetAllStudents(paging, sorting);
+            List<StudentModel> students = await StudentRepository.GetAllStudents(paging, sorting, filtering);
 
             return students;
         }

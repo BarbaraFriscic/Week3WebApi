@@ -16,7 +16,7 @@ namespace SchoolMS.Repository
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
 
-        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting)
+        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, Filtering filtering)
         {
             try
             {
@@ -25,7 +25,14 @@ namespace SchoolMS.Repository
                 using (connection)
                 {   StringBuilder queryString = new StringBuilder();                   
                     queryString.AppendLine("select * from Student ");
-                    if(sorting != null)
+                    if (filtering != null)
+                    {
+                        if (filtering.SchoolId != Guid.Empty)
+                        {
+                            queryString.AppendLine("where SchoolId = @schoolId");
+                        }
+                    }
+                    if (sorting != null)
                     {
                         queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder}");
                     }
@@ -34,7 +41,9 @@ namespace SchoolMS.Repository
                         queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only");
                     }
                     
+                    
                     SqlCommand commmand = new SqlCommand(queryString.ToString(), connection);
+                    commmand.Parameters.AddWithValue("@schoolId", filtering.SchoolId);
                     commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
                     commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
                     

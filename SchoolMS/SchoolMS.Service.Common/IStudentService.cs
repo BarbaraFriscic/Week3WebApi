@@ -10,7 +10,7 @@ namespace SchoolMS.Service.Common
 {
     public interface IStudentService
     {
-        Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting);
+        Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, Filtering filtering);
         Task<StudentModel> GetStudent(Guid id);
         Task<bool> AddNewStudent(StudentModel student);
         Task<bool> EditStudent(Guid id, StudentModel student);

@@ -29,7 +29,7 @@ namespace SchoolMS.WebApi.Controllers
 
         [HttpGet]
         [Route("api/student/get-all")]
-        public async Task<HttpResponseMessage> GetAllStudents(int pageNumber =1, int pageSize = 5, string orderByColumn = "Id", string sortOrder = "asc")
+        public async Task<HttpResponseMessage> GetAllStudents(Nullable<Guid> schoolId = null, int pageNumber =1, int pageSize = 5, string orderByColumn = "Id", string sortOrder = "asc")
         {
             Paging paging = new Paging
             {
@@ -42,8 +42,12 @@ namespace SchoolMS.WebApi.Controllers
                 SortOrder = sortOrder,
                 OrderBy = orderByColumn
             };
+            Filtering filtering = new Filtering
+            {
+                SchoolId = (Guid)(schoolId == null ? Guid.Empty : schoolId),
+            };
 
-            List<StudentModel> students = await StudentService.GetAllStudents(paging, sorting);
+            List<StudentModel> students = await StudentService.GetAllStudents(paging, sorting, filtering);
             List<StudentRest> mappedStudents = new List<StudentRest>();
             if (students == null)
             {
