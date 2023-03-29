@@ -45,6 +45,10 @@
     <Compile Include="StudentRepository.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SchoolMS.Common\SchoolMS.Common.csproj">
+      <Project>{e3f3bde9-771a-4974-b558-5889b355abfb}</Project>
+      <Name>SchoolMS.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SchoolMS.Model.Common\SchoolMS.Model.Common.csproj">
       <Project>{526E4150-E09F-43A4-862F-2078B5764016}</Project>
       <Name>SchoolMS.Model.Common</Name>

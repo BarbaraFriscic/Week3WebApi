@@ -1,4 +1,5 @@
-﻿using SchoolMS.Model;
+﻿using SchoolMS.Common;
+using SchoolMS.Model;
 using SchoolMS.Model.Common;
 using SchoolMS.Repository.Common;
 using System;
@@ -15,14 +16,28 @@ namespace SchoolMS.Repository
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
 
-        public async Task<List<StudentModel>> GetAllStudents()
+        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting)
         {
             try
             {
+
                 SqlConnection connection = new SqlConnection(connectionString);
                 using (connection)
-                {
-                    SqlCommand commmand = new SqlCommand("select * from Student", connection);
+                {   StringBuilder queryString = new StringBuilder();                   
+                    queryString.AppendLine("select * from Student ");
+                    if(sorting != null)
+                    {
+                        queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder}");
+                    }
+                    if(paging != null)
+                    {
+                        queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only");
+                    }
+                    
+                    SqlCommand commmand = new SqlCommand(queryString.ToString(), connection);
+                    commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
+                    commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
+                    
                     connection.Open();
 
                     SqlDataReader reader = await commmand.ExecuteReaderAsync();

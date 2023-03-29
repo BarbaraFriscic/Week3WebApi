@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Integration.WebApi;
+using SchoolMS.Common;
 using SchoolMS.Repository;
 using SchoolMS.Repository.Common;
 using SchoolMS.Service;

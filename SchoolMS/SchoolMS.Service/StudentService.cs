@@ -1,4 +1,5 @@
-﻿using SchoolMS.Model;
+﻿using SchoolMS.Common;
+using SchoolMS.Model;
 using SchoolMS.Repository;
 using SchoolMS.Repository.Common;
 using SchoolMS.Service.Common;
@@ -19,9 +20,9 @@ namespace SchoolMS.Service
             StudentRepository = studentRepository;
         }
 
-        public async Task<List<StudentModel>> GetAllStudents()
+        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting)
         {
-            List<StudentModel> students = await StudentRepository.GetAllStudents();
+            List<StudentModel> students = await StudentRepository.GetAllStudents(paging, sorting);
 
             return students;
         }
