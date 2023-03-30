@@ -50,6 +50,25 @@ namespace SchoolMS.Repository
                             queryString.AppendLine("and Average <= @averageTo ");
                             commmand.Parameters.AddWithValue("@averageTo", studentFilter.AverageTo);
                         }
+                        if (studentFilter.Average != null)
+                        {
+                            queryString.AppendLine("and Average = @average ");
+                            commmand.Parameters.AddWithValue("@average", studentFilter.Average);
+                        }
+                        if(studentFilter.DOBFrom != null)
+                        {
+                            if(studentFilter.DOBTo != null)
+                            {
+                                queryString.AppendLine("and DOB between @dobFrom and @dobTo ");                               
+                            }
+                            queryString.AppendLine("and DOB between @dobFrom and '1-1-2999' ");
+                            commmand.Parameters.AddWithValue("@dobFrom", studentFilter.DOBFrom);
+                        }
+                        if (studentFilter.DOBTo != null)
+                        {
+                            queryString.AppendLine("and DOB between '1-1-1900' and @dobTo ");
+                            commmand.Parameters.AddWithValue("@dobTo", studentFilter.DOBTo);
+                        }
                     }
                     if (sorting != null)
                     {

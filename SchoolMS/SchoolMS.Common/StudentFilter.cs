@@ -10,9 +10,9 @@ namespace SchoolMS.Common
     {
         public string Name { get; set; }       
         public Guid? SchoolId { get; set; }
-        //public int DOBFrom { get; set; }
-        //public int DOBTo { get; set;}
-        //public decimal Average { get; set; }
+        public DateTime? DOBFrom { get; set; } = null;
+        public DateTime? DOBTo { get; set; } = null;
+        public decimal? Average { get; set; } = null;
         public decimal? AverageFrom { get; set; } = null;
         public decimal? AverageTo { get; set; } = null;
     }
