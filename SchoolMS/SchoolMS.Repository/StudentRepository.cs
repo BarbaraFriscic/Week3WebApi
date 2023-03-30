@@ -16,47 +16,82 @@ namespace SchoolMS.Repository
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
 
-        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, Filtering filtering)
+        public async Task<List<StudentModelDTO>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter studentFilter)
         {
             try
             {
 
                 SqlConnection connection = new SqlConnection(connectionString);
                 using (connection)
-                {   StringBuilder queryString = new StringBuilder();                   
-                    queryString.AppendLine("select * from Student ");
-                    if (filtering != null)
+                {   StringBuilder queryString = new StringBuilder();
+
+                    SqlCommand commmand = new SqlCommand();
+                    queryString.AppendLine("select * from Student where 1=1");           
+                    if (studentFilter != null)
                     {
-                        if (filtering.SchoolId != Guid.Empty)
+                        if (studentFilter.SchoolId != Guid.Empty)
                         {
-                            queryString.AppendLine("where SchoolId = @schoolId");
+                            queryString.AppendLine("and SchoolId = @schoolId ");
+                            commmand.Parameters.AddWithValue("@schoolId", studentFilter.SchoolId);
+
+                        }
+                        if(studentFilter.Name != null)
+                        {
+                            queryString.AppendLine("and FirstName like '%'+@name+'%' or LastName like '%'+@name+'%' ");
+                            commmand.Parameters.AddWithValue("@name", studentFilter.Name);
+                        }
+                        if(studentFilter.AverageFrom != null)
+                        {
+                            queryString.AppendLine("and Average >= @averageFrom ");
+                            commmand.Parameters.AddWithValue("@averageFrom", studentFilter.AverageFrom);
+                        }
+                        if (studentFilter.AverageTo != null)
+                        {
+                            queryString.AppendLine("and Average <= @averageTo ");
+                            commmand.Parameters.AddWithValue("@averageTo", studentFilter.AverageTo);
+                        }
+                        if (studentFilter.Average != null)
+                        {
+                            queryString.AppendLine("and Average = @average ");
+                            commmand.Parameters.AddWithValue("@average", studentFilter.Average);
+                        }
+                        if(studentFilter.DOBFrom != null)
+                        {
+                            if(studentFilter.DOBTo != null)
+                            {
+                                queryString.AppendLine("and DOB between @dobFrom and @dobTo ");                               
+                            }
+                            queryString.AppendLine("and DOB between @dobFrom and '1-1-2999' ");
+                            commmand.Parameters.AddWithValue("@dobFrom", studentFilter.DOBFrom);
+                        }
+                        if (studentFilter.DOBTo != null)
+                        {
+                            queryString.AppendLine("and DOB between '1-1-1900' and @dobTo ");
+                            commmand.Parameters.AddWithValue("@dobTo", studentFilter.DOBTo);
                         }
                     }
                     if (sorting != null)
                     {
-                        queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder}");
+                        queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder} ");
                     }
                     if(paging != null)
                     {
-                        queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only");
+                        queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only" );
+                        commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
+                        commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
                     }
-                    
-                    
-                    SqlCommand commmand = new SqlCommand(queryString.ToString(), connection);
-                    commmand.Parameters.AddWithValue("@schoolId", filtering.SchoolId);
-                    commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
-                    commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
-                    
-                    connection.Open();
+                    commmand.Connection = connection;
+                    commmand.CommandText = queryString.ToString();
 
+                    connection.Open();
                     SqlDataReader reader = await commmand.ExecuteReaderAsync();
 
-                    List<StudentModel> students = new List<StudentModel>();
+                    List<StudentModelDTO> students = new List<StudentModelDTO>();
                     if (reader.HasRows)
                     {
                         while (reader.Read())
                         {
-                            StudentModel student = new StudentModel();
+                            StudentModelDTO student = new StudentModelDTO();
                             student.Id = reader.GetGuid(0);
                             student.FirstName = reader.GetString(1);
                             student.LastName = reader.GetString(2);
@@ -82,7 +117,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public async Task<StudentModel> GetStudent(Guid id)
+        public async Task<StudentModelDTO> GetStudent(Guid id)
         {
             try
             {
@@ -94,7 +129,7 @@ namespace SchoolMS.Repository
                     connection.Open();
                     SqlDataReader reader = await command.ExecuteReaderAsync();
 
-                    StudentModel student = new StudentModel();
+                    StudentModelDTO student = new StudentModelDTO();
                     if (reader.HasRows)
                     {
                         reader.Read();
@@ -121,7 +156,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public async Task<bool> AddNewStudent(StudentModel student)
+        public async Task<bool> AddNewStudent(StudentModelDTO student)
         {
             try
             {
@@ -155,7 +190,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public async Task<bool> EditStudent(Guid id, StudentModel student)
+        public async Task<bool> EditStudent(Guid id, StudentModelDTO student)
         {
             try
             {

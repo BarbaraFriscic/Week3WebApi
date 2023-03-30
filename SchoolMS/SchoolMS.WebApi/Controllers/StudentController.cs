@@ -29,7 +29,11 @@ namespace SchoolMS.WebApi.Controllers
 
         [HttpGet]
         [Route("api/student/get-all")]
-        public async Task<HttpResponseMessage> GetAllStudents(Nullable<Guid> schoolId = null, int pageNumber =1, int pageSize = 5, string orderByColumn = "Id", string sortOrder = "asc")
+        public async Task<HttpResponseMessage> GetAllStudents(
+            DateTime? dobTo = null, DateTime? dobFrom = null,decimal? average = null, 
+            decimal ? averageTo = null, decimal? averageFrom = null, string name = null, 
+            Nullable<Guid> schoolId = null, int pageNumber =1, int pageSize = 5, string orderByColumn = "Id", 
+            string sortOrder = "asc")
         {
             Paging paging = new Paging
             {
@@ -42,18 +46,24 @@ namespace SchoolMS.WebApi.Controllers
                 SortOrder = sortOrder,
                 OrderBy = orderByColumn
             };
-            Filtering filtering = new Filtering
+            StudentFilter filtering = new StudentFilter
             {
+                Name = name == null ? null : name,
                 SchoolId = (Guid)(schoolId == null ? Guid.Empty : schoolId),
+                AverageFrom = averageFrom == null? (decimal?)null : averageFrom,
+                AverageTo = averageTo == null ? (decimal?)null : averageTo,
+                Average = average == null? (decimal?)null : average,
+                DOBFrom = dobFrom == null? (DateTime?)null : dobFrom,
+                DOBTo = dobTo == null? (DateTime?)null : dobTo,
             };
 
-            List<StudentModel> students = await StudentService.GetAllStudents(paging, sorting, filtering);
+            List<StudentModelDTO> students = await StudentService.GetAllStudents(paging, sorting, filtering);
             List<StudentRest> mappedStudents = new List<StudentRest>();
             if (students == null)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No records of Students found.");
             }
-            foreach (StudentModel student in students)
+            foreach (StudentModelDTO student in students)
             {
                 StudentRest mappedStudent = new StudentRest();
                 mappedStudent.FirstName = student.FirstName;
@@ -68,7 +78,7 @@ namespace SchoolMS.WebApi.Controllers
         //[Route("api/student/get-by-id/{id}")]
         public async Task<HttpResponseMessage> GetStudent(Guid id)
         {
-            StudentModel student = await StudentService.GetStudent(id);
+            StudentModelDTO student = await StudentService.GetStudent(id);
             if (student == null)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Unable to find that Student.");
@@ -86,7 +96,7 @@ namespace SchoolMS.WebApi.Controllers
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
             }
-            StudentModel studentModel = new StudentModel();
+            StudentModelDTO studentModel = new StudentModelDTO();
             studentModel.FirstName = studentRest.FirstName;
             studentModel.LastName = studentRest.LastName;
             studentModel.Address = studentRest.Address;
@@ -116,7 +126,7 @@ namespace SchoolMS.WebApi.Controllers
         [HttpPut]
         public async Task<HttpResponseMessage> UpdateStudent(Guid id, StudentPutRest studentRest)
         {
-            StudentModel studentModel = new StudentModel();
+            StudentModelDTO studentModel = new StudentModelDTO();
             studentModel.FirstName = studentRest.FirstName;
             studentModel.LastName = studentRest.LastName;
             studentModel.Address = studentRest.Address;

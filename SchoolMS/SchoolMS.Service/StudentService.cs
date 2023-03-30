@@ -20,34 +20,34 @@ namespace SchoolMS.Service
             StudentRepository = studentRepository;
         }
 
-        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, Filtering filtering)
+        public async Task<List<StudentModelDTO>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter filtering)
         {
-            List<StudentModel> students = await StudentRepository.GetAllStudents(paging, sorting, filtering);
+            List<StudentModelDTO> students = await StudentRepository.GetAllStudents(paging, sorting, filtering);
 
             return students;
         }
 
-        public async Task<StudentModel> GetStudent(Guid id)
+        public async Task<StudentModelDTO> GetStudent(Guid id)
         {
-            StudentModel studentModel= await StudentRepository.GetStudent(id);
+            StudentModelDTO studentModel= await StudentRepository.GetStudent(id);
 
             return studentModel;
         }
 
-        public async Task<bool> AddNewStudent(StudentModel student)
+        public async Task<bool> AddNewStudent(StudentModelDTO student)
         {
             bool isAdded = await StudentRepository.AddNewStudent(student);
             return isAdded;
         }
 
-        public async Task<bool> EditStudent(Guid id, StudentModel student)
+        public async Task<bool> EditStudent(Guid id, StudentModelDTO student)
         {
-            StudentModel studentCheck = await StudentRepository.GetStudent(id);
+            StudentModelDTO studentCheck = await StudentRepository.GetStudent(id);
             if(studentCheck == null)
             {
                 return false;
             }
-            StudentModel studentToEdit = new StudentModel
+            StudentModelDTO studentToEdit = new StudentModelDTO
             {
                 Id = id,
                 FirstName = student.FirstName == default ? studentCheck.FirstName : student.FirstName,
@@ -64,7 +64,7 @@ namespace SchoolMS.Service
 
         public async Task<bool> DeleteStudent(Guid id)
         {
-            StudentModel studentCheck = await StudentRepository.GetStudent(id);
+            StudentModelDTO studentCheck = await StudentRepository.GetStudent(id);
             if(studentCheck == null)
             {
                 return false;
