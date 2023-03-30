@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Integration.WebApi;
 using SchoolMS.Common;
+using SchoolMS.DAL;
 using SchoolMS.Repository;
 using SchoolMS.Repository.Common;
 using SchoolMS.Service;
@@ -27,7 +28,8 @@ namespace SchoolMS.WebApi.App_Start
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
 
             builder.RegisterType<StudentService>().As<IStudentService>();
-            builder.RegisterType<StudentRepository>().As<IStudentRepository>().InstancePerRequest();
+            builder.RegisterType<EFStudentRepository>().As<IStudentRepository>();
+            builder.RegisterType<SchoolMSContext>().AsSelf().InstancePerLifetimeScope();
 
             var container = builder.Build();
             config.DependencyResolver = new AutofacWebApiDependencyResolver(container);

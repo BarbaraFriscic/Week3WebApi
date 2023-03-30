@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SchoolMS.Model
 {
-    public class StudentModel : IStudentModel
+    public class StudentModelDTO : IStudentModel
     {
         public Guid Id { get; set; }
 

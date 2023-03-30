@@ -16,7 +16,7 @@ namespace SchoolMS.Repository
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
 
-        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter studentFilter)
+        public async Task<List<StudentModelDTO>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter studentFilter)
         {
             try
             {
@@ -86,12 +86,12 @@ namespace SchoolMS.Repository
                     connection.Open();
                     SqlDataReader reader = await commmand.ExecuteReaderAsync();
 
-                    List<StudentModel> students = new List<StudentModel>();
+                    List<StudentModelDTO> students = new List<StudentModelDTO>();
                     if (reader.HasRows)
                     {
                         while (reader.Read())
                         {
-                            StudentModel student = new StudentModel();
+                            StudentModelDTO student = new StudentModelDTO();
                             student.Id = reader.GetGuid(0);
                             student.FirstName = reader.GetString(1);
                             student.LastName = reader.GetString(2);
@@ -117,7 +117,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public async Task<StudentModel> GetStudent(Guid id)
+        public async Task<StudentModelDTO> GetStudent(Guid id)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace SchoolMS.Repository
                     connection.Open();
                     SqlDataReader reader = await command.ExecuteReaderAsync();
 
-                    StudentModel student = new StudentModel();
+                    StudentModelDTO student = new StudentModelDTO();
                     if (reader.HasRows)
                     {
                         reader.Read();
@@ -156,7 +156,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public async Task<bool> AddNewStudent(StudentModel student)
+        public async Task<bool> AddNewStudent(StudentModelDTO student)
         {
             try
             {
@@ -190,7 +190,7 @@ namespace SchoolMS.Repository
             }
         }
 
-        public async Task<bool> EditStudent(Guid id, StudentModel student)
+        public async Task<bool> EditStudent(Guid id, StudentModelDTO student)
         {
             try
             {
