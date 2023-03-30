@@ -16,39 +16,55 @@ namespace SchoolMS.Repository
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
 
-        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, Filtering filtering)
+        public async Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter studentFilter)
         {
             try
             {
 
                 SqlConnection connection = new SqlConnection(connectionString);
                 using (connection)
-                {   StringBuilder queryString = new StringBuilder();                   
-                    queryString.AppendLine("select * from Student ");
-                    if (filtering != null)
+                {   StringBuilder queryString = new StringBuilder();
+
+                    SqlCommand commmand = new SqlCommand();
+                    queryString.AppendLine("select * from Student where 1=1");           
+                    if (studentFilter != null)
                     {
-                        if (filtering.SchoolId != Guid.Empty)
+                        if (studentFilter.SchoolId != Guid.Empty)
                         {
-                            queryString.AppendLine("where SchoolId = @schoolId");
+                            queryString.AppendLine("and SchoolId = @schoolId ");
+                            commmand.Parameters.AddWithValue("@schoolId", studentFilter.SchoolId);
+
+                        }
+                        if(studentFilter.Name != null)
+                        {
+                            queryString.AppendLine("and FirstName like '%'+@name+'%' or LastName like '%'+@name+'%' ");
+                            commmand.Parameters.AddWithValue("@name", studentFilter.Name);
+                        }
+                        if(studentFilter.AverageFrom != null)
+                        {
+                            queryString.AppendLine("and Average >= @averageFrom ");
+                            commmand.Parameters.AddWithValue("@averageFrom", studentFilter.AverageFrom);
+                        }
+                        if (studentFilter.AverageTo != null)
+                        {
+                            queryString.AppendLine("and Average <= @averageTo ");
+                            commmand.Parameters.AddWithValue("@averageTo", studentFilter.AverageTo);
                         }
                     }
                     if (sorting != null)
                     {
-                        queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder}");
+                        queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder} ");
                     }
                     if(paging != null)
                     {
-                        queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only");
+                        queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only" );
+                        commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
+                        commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
                     }
-                    
-                    
-                    SqlCommand commmand = new SqlCommand(queryString.ToString(), connection);
-                    commmand.Parameters.AddWithValue("@schoolId", filtering.SchoolId);
-                    commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
-                    commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
-                    
-                    connection.Open();
+                    commmand.Connection = connection;
+                    commmand.CommandText = queryString.ToString();
 
+                    connection.Open();
                     SqlDataReader reader = await commmand.ExecuteReaderAsync();
 
                     List<StudentModel> students = new List<StudentModel>();

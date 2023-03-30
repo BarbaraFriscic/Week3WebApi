@@ -10,7 +10,7 @@ namespace SchoolMS.Repository.Common
 {
     public interface IStudentRepository
     {
-        Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, Filtering filtering);
+        Task<List<StudentModel>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter filtering);
         Task<StudentModel> GetStudent(Guid id);
         Task<bool> AddNewStudent(StudentModel student);
         Task<bool> EditStudent(Guid id,  StudentModel student);

@@ -29,7 +29,7 @@ namespace SchoolMS.WebApi.Controllers
 
         [HttpGet]
         [Route("api/student/get-all")]
-        public async Task<HttpResponseMessage> GetAllStudents(Nullable<Guid> schoolId = null, int pageNumber =1, int pageSize = 5, string orderByColumn = "Id", string sortOrder = "asc")
+        public async Task<HttpResponseMessage> GetAllStudents(decimal? averageTo = null, decimal? averageFrom = null, string name = null, Nullable<Guid> schoolId = null, int pageNumber =1, int pageSize = 5, string orderByColumn = "Id", string sortOrder = "asc")
         {
             Paging paging = new Paging
             {
@@ -42,9 +42,12 @@ namespace SchoolMS.WebApi.Controllers
                 SortOrder = sortOrder,
                 OrderBy = orderByColumn
             };
-            Filtering filtering = new Filtering
+            StudentFilter filtering = new StudentFilter
             {
+                Name = name == null ? null : name,
                 SchoolId = (Guid)(schoolId == null ? Guid.Empty : schoolId),
+                AverageFrom = averageFrom == null? (decimal?)null : averageFrom.Value,
+                AverageTo = averageTo == null ? (decimal?)null : averageTo.Value,
             };
 
             List<StudentModel> students = await StudentService.GetAllStudents(paging, sorting, filtering);
