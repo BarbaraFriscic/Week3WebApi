@@ -68,6 +68,7 @@ namespace SchoolMS.WebApi.Controllers
                 StudentRest mappedStudent = new StudentRest();
                 mappedStudent.FirstName = student.FirstName;
                 mappedStudent.LastName = student.LastName;
+                mappedStudent.SchoolName = student.SchoolName;
 
                 mappedStudents.Add(mappedStudent);
             }
@@ -102,6 +103,7 @@ namespace SchoolMS.WebApi.Controllers
             studentModel.Address = studentRest.Address;
             studentModel.DOB = studentRest.DOB;
             studentModel.SchoolId = studentRest.SchoolId;
+            studentModel.Average = studentRest.Average;
 
             bool isAdded = await StudentService.AddNewStudent(studentModel);
             if (!isAdded)
@@ -158,6 +160,8 @@ namespace SchoolMS.WebApi.Controllers
 
             [Required(ErrorMessage = "School Id is required")]
             public Guid SchoolId { get; set; }
+
+            public decimal? Average { get; set; } = null;
         }
 
         public class StudentPutRest
