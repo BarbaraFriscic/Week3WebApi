@@ -15,6 +15,7 @@ namespace SchoolMS.Model.Common
         DateTime DOB { get; set; }
         string Address { get; set; }
         Guid SchoolId { get; set; }
+        string SchoolName { get; set; }
         decimal? Average { get; set; }
 
     }

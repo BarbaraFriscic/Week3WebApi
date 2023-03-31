@@ -22,6 +22,8 @@ namespace SchoolMS.Model
 
         public Guid SchoolId { get; set; }
 
-        public decimal? Average { get; set; }
+        public string SchoolName { get; set; }
+
+        public decimal? Average { get; set; } = null;
     }
 }
