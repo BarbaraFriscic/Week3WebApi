@@ -100,36 +100,37 @@ namespace SchoolMS.Repository
                 IQueryable<Student> query = Context.Student.Include(s => s.School);
 
                 if(studentFilter != null)
-                {   if(studentFilter.SchoolId != Guid.Empty)
+                {
+                    if (studentFilter.SchoolId != Guid.Empty)
                     {
-                        query = query.Where(s => s.SchoolId == studentFilter.SchoolId);
+                         query = query.Where(s => s.SchoolId == studentFilter.SchoolId);
                     }
                     if (studentFilter.Name != null)
                     {
-                        query = query.Where(s => s.FirstName.
-                                Contains(studentFilter.Name)||s.LastName.
+                         query = query.Where(s => s.FirstName.
+                                Contains(studentFilter.Name) || s.LastName.
                                 Contains(studentFilter.Name));
                     }
                     if (studentFilter.AverageFrom != null)
                     {
-                        query = query.Where(s =>s.Average >=  studentFilter.AverageFrom);
+                         query = query.Where(s => s.Average >= studentFilter.AverageFrom);
                     }
                     if (studentFilter.AverageTo != null)
                     {
-                        query = query.Where(s => s.Average <= studentFilter.AverageTo);
+                         query = query.Where(s => s.Average <= studentFilter.AverageTo);
 
                     }
                     if (studentFilter.Average != null)
                     {
-                        query = query.Where(s => s.Average == studentFilter.Average);
+                         query = query.Where(s => s.Average == studentFilter.Average);
                     }
                     if (studentFilter.DOBFrom != null)
                     {
                         if (studentFilter.DOBTo != null)
                         {
-                            query = query.Where(s => s.DOB >= studentFilter.DOBFrom && s.DOB <= studentFilter.DOBTo);
+                             query = query.Where(s => s.DOB >= studentFilter.DOBFrom && s.DOB <= studentFilter.DOBTo);
                         }
-                        query = query.Where(s => s.DOB >= studentFilter.DOBFrom);
+                         query = query.Where(s => s.DOB >= studentFilter.DOBFrom);
                     }
                     if (studentFilter.DOBTo != null)
                     {
@@ -137,9 +138,41 @@ namespace SchoolMS.Repository
                     }
                 }  
                 if (sorting != null)
-                {              
-                    
+                {
+                    if (sorting.OrderBy.Equals("Id"))
+                    {
+                         query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.Id) : query.OrderByDescending(s => s.Id);
+                    }
+                    if (sorting.OrderBy.Equals("FirstName"))
+                    {
+                         query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.FirstName) : query.OrderByDescending(s => s.FirstName);
+                    }
+                    if (sorting.OrderBy.Equals("LastName"))
+                    {
+                        query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.LastName) : query.OrderByDescending(s => s.LastName);
+                    }
+                    if (sorting.OrderBy.Equals("Average"))
+                    {
+                        query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.Average) : query.OrderByDescending(s => s.Average);
+                    }
+                    if (sorting.OrderBy.Equals("DOB"))
+                    {
+                        query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.DOB) : query.OrderByDescending(s => s.DOB);
+                    }
+                    if (sorting.OrderBy.Equals("SchoolId"))
+                    {
+                        query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.SchoolId) : query.OrderByDescending(s => s.SchoolId);
+                    }
+                    if(sorting.OrderBy.Equals("Address"))
+                    {
+                         query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.Address) : query.OrderByDescending(s => s.Address);
+                    }
+                }                
+                if(paging != null)
+                {
+                    query = query.Skip((int)((paging.PageNumber - 1) * paging.PageSize)).Take((int)paging.PageSize);
                 }
+
                 List<StudentModelDTO> studentDtos = await query.Select(s => new StudentModelDTO()
                 {
                     Id = s.Id,
@@ -186,6 +219,80 @@ namespace SchoolMS.Repository
             catch (Exception)
             {
                 return null;
+            }
+        }
+
+        public IQueryable<Student> CheckFilter(StudentFilter studentFilter, IQueryable<Student> query)
+        {
+            //IQueryable<Student> query = Context.Student;
+            if (studentFilter.SchoolId != Guid.Empty)
+            {
+                return query = query.Where(s => s.SchoolId == studentFilter.SchoolId);
+            }
+            if (studentFilter.Name != null)
+            {
+                return query = query.Where(s => s.FirstName.
+                        Contains(studentFilter.Name) || s.LastName.
+                        Contains(studentFilter.Name));
+            }
+            if (studentFilter.AverageFrom != null)
+            {
+                return query = query.Where(s => s.Average >= studentFilter.AverageFrom);
+            }
+            if (studentFilter.AverageTo != null)
+            {
+                return query = query.Where(s => s.Average <= studentFilter.AverageTo);
+
+            }
+            if (studentFilter.Average != null)
+            {
+                return query = query.Where(s => s.Average == studentFilter.Average);
+            }
+            if (studentFilter.DOBFrom != null)
+            {
+                if (studentFilter.DOBTo != null)
+                {
+                    return query = query.Where(s => s.DOB >= studentFilter.DOBFrom && s.DOB <= studentFilter.DOBTo);
+                }
+                return query = query.Where(s => s.DOB >= studentFilter.DOBFrom);
+            }
+            if (studentFilter.DOBTo != null)
+            {
+                return query = query.Where(s => s.DOB <= studentFilter.DOBTo);
+            }
+            return query;
+        }
+
+        public IQueryable<Student> CheckOrderBy(Sorting sorting, IQueryable<Student> query)
+        {
+            //IQueryable<Student> query = Context.Student;
+            if (sorting.OrderBy.Equals("Id"))
+            {
+                return query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.Id) : query.OrderByDescending(s => s.Id);
+            }
+            else if (sorting.OrderBy.Equals("FirstName"))
+            {
+                return query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.FirstName) : query.OrderByDescending(s => s.FirstName);
+            }
+            else if (sorting.OrderBy.Equals("LastName"))
+            {
+                return query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.LastName) : query.OrderByDescending(s => s.LastName);
+            }
+            else if (sorting.OrderBy.Equals("Average"))
+            {
+                return query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.Average) : query.OrderByDescending(s => s.Average);
+            }
+            else if (sorting.OrderBy.Equals("DOB"))
+            {
+                return query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.DOB) : query.OrderByDescending(s => s.DOB);
+            }
+            else if (sorting.OrderBy.Equals("SchoolId"))
+            {
+                return query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.SchoolId) : query.OrderByDescending(s => s.SchoolId);
+            }
+            else
+            {
+                return query = sorting.SortOrder == "asc" ? query.OrderBy(s => s.Address) : query.OrderByDescending(s => s.Address);
             }
         }
     }
