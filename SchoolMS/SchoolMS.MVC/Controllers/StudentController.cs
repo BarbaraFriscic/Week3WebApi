@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 
 namespace SchoolMS.MVC.Controllers
 {
@@ -49,14 +50,14 @@ namespace SchoolMS.MVC.Controllers
                     DOBTo = dobTo == null ? (DateTime?)null : dobTo,
                 };
                 List<StudentModelDTO> studentDtos = await StudentService.GetAllStudents(paging, sorting, filter);
-                List<StudentViewModel> studentsView = new List<StudentViewModel>();
+                List<StudentView> studentsView = new List<StudentView>();
                 if (studentDtos == null)
                 {
                     return View("Error");
                 }
                 foreach (StudentModelDTO student in studentDtos)
                 {
-                    StudentViewModel studentView = new StudentViewModel();
+                    StudentView studentView = new StudentView();
                     studentView.Id = student.Id;
                     studentView.SchoolName = student.SchoolName;
                     studentView.FirstName = student.FirstName;
@@ -69,6 +70,119 @@ namespace SchoolMS.MVC.Controllers
             {
                 return View("Error");
             }          
+        }
+        [HttpGet]
+        public async Task<ActionResult> Edit(Guid id)
+        {
+            try
+            {
+                StudentModelDTO student = await StudentService.GetStudent(id);
+                if (student == null)
+                {
+                    return View("Error");
+                }
+                StudentEditView studentEdit = new StudentEditView();
+                studentEdit.Id = id;
+                studentEdit.Address = student.Address;
+                studentEdit.FirstName = student.FirstName;
+                studentEdit.LastName = student.LastName;
+
+                return View(studentEdit);
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }         
+        }
+        [HttpPost]
+        public async Task<ActionResult> Edit(StudentEditView student)
+        {
+            try
+            {
+                StudentModelDTO studentDto = new StudentModelDTO();
+                studentDto.Id = student.Id;
+                studentDto.Address = student.Address;
+                studentDto.FirstName = student.FirstName;
+                studentDto.LastName = student.LastName;
+
+                bool isEdited = await StudentService.EditStudent(studentDto.Id, studentDto);
+                if (!isEdited)
+                {
+                    return View("Error");
+                }
+                return RedirectToAction("StudentList");
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }
+        }
+        [HttpGet]
+        public async Task<ActionResult> Details(Guid id)
+        {
+            try
+            {
+                StudentModelDTO student = await StudentService.GetStudent(id);
+                if (student == null)
+                {
+                    return View("Error");
+                }
+                StudentView studentView = new StudentView
+                {
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    Id = id,
+                    SchoolName = student.SchoolName
+                };
+                return View(studentView);
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }            
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Delete(Guid id)
+        {
+            try
+            {
+                StudentModelDTO studentDto = await StudentService.GetStudent(id);
+                if(studentDto == null)
+                {
+                    return View("Error");
+                }
+                StudentView studentView = new StudentView
+                {
+                    FirstName=studentDto.FirstName,
+                    LastName=studentDto.LastName,
+                    Id = id,
+                    SchoolName = studentDto.SchoolName
+                };
+                return View(studentView);
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<ActionResult> DeleteConfirmed(Guid id)
+        {
+            try
+            {
+                bool isDeleted = await StudentService.DeleteStudent(id);
+                if (!isDeleted)
+                {
+                    return View("Error");
+                }
+                return RedirectToAction("StudentList");
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }           
         }
     }
 }
