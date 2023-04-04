@@ -161,8 +161,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\StudentView\StudentCreateView.cs" />
     <Compile Include="Models\StudentView\StudentEditView.cs" />
-    <Compile Include="Models\StudentView\StudentView.cs" />
+    <Compile Include="Models\StudentView\StudentListView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +221,8 @@
     <Content Include="Views\Student\Edit.cshtml" />
     <Content Include="Views\Student\Details.cshtml" />
     <Content Include="Views\Student\Delete.cshtml" />
+    <Content Include="Views\Student\Create.cshtml" />
+    <Content Include="Views\Shared\Date.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
