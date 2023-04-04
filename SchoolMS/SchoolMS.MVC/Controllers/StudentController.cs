@@ -16,10 +16,12 @@ namespace SchoolMS.MVC.Controllers
     public class StudentController : Controller
     {
         protected IStudentService StudentService { get; set; }
+        protected ISchoolService SchoolService { get; set; }
         
-        public StudentController(IStudentService studentService)
+        public StudentController(IStudentService studentService, ISchoolService schoolService)
         {
             StudentService = studentService;
+            SchoolService = schoolService;
         }
 
         [HttpGet]
@@ -186,7 +188,7 @@ namespace SchoolMS.MVC.Controllers
             }           
         }
         [HttpGet]
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
             return View("Create");
         }
@@ -194,8 +196,7 @@ namespace SchoolMS.MVC.Controllers
         public async Task<ActionResult> Create(StudentCreateView studentCreateView)
         {
             try
-            {
-                
+            {              
                 StudentModelDTO studentModel = new StudentModelDTO();
                 studentModel.FirstName = studentCreateView.FirstName;
                 studentModel.LastName = studentCreateView.LastName;

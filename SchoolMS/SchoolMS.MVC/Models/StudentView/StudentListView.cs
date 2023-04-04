@@ -12,6 +12,5 @@ namespace SchoolMS.MVC.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string SchoolName { get; set; }
-        public List<SelectListItem> SchoolList { get; set; }
     }
 }
