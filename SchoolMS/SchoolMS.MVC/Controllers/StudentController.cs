@@ -1,6 +1,7 @@
 ﻿using SchoolMS.Common;
 using SchoolMS.Model;
 using SchoolMS.MVC.Models;
+using SchoolMS.MVC.Models.StudentView;
 using SchoolMS.Service.Common;
 using System;
 using System.Collections.Generic;
@@ -15,10 +16,12 @@ namespace SchoolMS.MVC.Controllers
     public class StudentController : Controller
     {
         protected IStudentService StudentService { get; set; }
+        protected ISchoolService SchoolService { get; set; }
         
-        public StudentController(IStudentService studentService)
+        public StudentController(IStudentService studentService, ISchoolService schoolService)
         {
             StudentService = studentService;
+            SchoolService = schoolService;
         }
 
         [HttpGet]
@@ -50,14 +53,14 @@ namespace SchoolMS.MVC.Controllers
                     DOBTo = dobTo == null ? (DateTime?)null : dobTo,
                 };
                 List<StudentModelDTO> studentDtos = await StudentService.GetAllStudents(paging, sorting, filter);
-                List<StudentView> studentsView = new List<StudentView>();
+                List<StudentListView> studentsView = new List<StudentListView>();
                 if (studentDtos == null)
                 {
                     return View("Error");
                 }
                 foreach (StudentModelDTO student in studentDtos)
                 {
-                    StudentView studentView = new StudentView();
+                    StudentListView studentView = new StudentListView();
                     studentView.Id = student.Id;
                     studentView.SchoolName = student.SchoolName;
                     studentView.FirstName = student.FirstName;
@@ -127,7 +130,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentView studentView = new StudentView
+                StudentListView studentView = new StudentListView
                 {
                     FirstName = student.FirstName,
                     LastName = student.LastName,
@@ -152,7 +155,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentView studentView = new StudentView
+                StudentListView studentView = new StudentListView
                 {
                     FirstName=studentDto.FirstName,
                     LastName=studentDto.LastName,
@@ -183,6 +186,35 @@ namespace SchoolMS.MVC.Controllers
             {
                 return View("Error");
             }           
+        }
+        [HttpGet]
+        public async Task<ActionResult> Create()
+        {
+            return View("Create");
+        }
+        [HttpPost, ActionName("Create")]
+        public async Task<ActionResult> Create(StudentCreateView studentCreateView)
+        {
+            try
+            {              
+                StudentModelDTO studentModel = new StudentModelDTO();
+                studentModel.FirstName = studentCreateView.FirstName;
+                studentModel.LastName = studentCreateView.LastName;
+                studentModel.Address = studentCreateView.Address;
+                studentModel.DOB = studentCreateView.DOB;
+                studentModel.SchoolId = studentCreateView.SchoolId;
+
+                bool isAdded = await StudentService.AddNewStudent(studentModel);
+                if(!isAdded)
+                {
+                    return View("Error");
+                }
+                return RedirectToAction("StudentList");
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }
         }
     }
 }
