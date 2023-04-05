@@ -10,64 +10,51 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using PagedList;
+using PagedList.Mvc;
+using AutoMapper;
 
 namespace SchoolMS.MVC.Controllers
 {
     public class StudentController : Controller
     {
+        private IMapper _mapper { get; set; }
         protected IStudentService StudentService { get; set; }
         protected ISchoolService SchoolService { get; set; }
         
-        public StudentController(IStudentService studentService, ISchoolService schoolService)
+        public StudentController(IStudentService studentService, ISchoolService schoolService, IMapper mapper)
         {
             StudentService = studentService;
             SchoolService = schoolService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult> StudentList(DateTime? dobTo = null, DateTime? dobFrom = null, decimal? average = null,
-            decimal? averageTo = null, decimal? averageFrom = null, string name = null,
-            Nullable<Guid> schoolId = null, int pageNumber = 1, int pageSize = 5, string orderByColumn = "Id",
-            string sortOrder = "asc")
+        public async Task<ActionResult> StudentList(string sortBy, string searchBy, string search, int? pageNumber, int? pageSize)
         {
             try
             {
-                Paging paging = new Paging
-                {
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                };
-                Sorting sorting = new Sorting
-                {
-                    SortOrder = sortOrder,
-                    OrderBy = orderByColumn,
-                };
-                StudentFilter filter = new StudentFilter
-                {
-                    Name = name == null ? null : name,
-                    SchoolId = (Guid)(schoolId == null ? Guid.Empty : schoolId),
-                    AverageFrom = averageFrom == null ? (decimal?)null : averageFrom,
-                    AverageTo = averageTo == null ? (decimal?)null : averageTo,
-                    Average = average == null ? (decimal?)null : average,
-                    DOBFrom = dobFrom == null ? (DateTime?)null : dobFrom,
-                    DOBTo = dobTo == null ? (DateTime?)null : dobTo,
-                };
-                List<StudentModelDTO> studentDtos = await StudentService.GetAllStudents(paging, sorting, filter);
-                List<StudentListView> studentsView = new List<StudentListView>();
+                ViewBag.SortByFirstName = string.IsNullOrEmpty(sortBy) ? "FirstName desc" : "";
+                ViewBag.SortByLastName = sortBy == "LastName" ? "LastName desc" : "LastName";
+                ViewBag.SortBySchoolName = sortBy == "SchoolName" ? "SchoolName desc" : "SchoolName";
+
+                IPagedList<StudentModelDTO> studentDtos = await StudentService.GetAllStudents(sortBy, search, pageNumber ?? 1, pageSize ?? 5);
+                
                 if (studentDtos == null)
                 {
                     return View("Error");
                 }
-                foreach (StudentModelDTO student in studentDtos)
+                List<StudentListView> studentsView = studentDtos.Select(s => new StudentListView()
                 {
-                    StudentListView studentView = new StudentListView();
-                    studentView.Id = student.Id;
-                    studentView.SchoolName = student.SchoolName;
-                    studentView.FirstName = student.FirstName;
-                    studentView.LastName = student.LastName;
-                    studentsView.Add(studentView);
-                }
-                return View(studentsView);
+                    FirstName = s.FirstName,
+                    Id = s.Id,
+                    LastName = s.LastName,
+                    SchoolName = s.SchoolName
+                }).ToList();
+                
+                var pagedList = new StaticPagedList<StudentListView>(studentsView, pageNumber ?? 1,pageSize ?? 5,studentDtos.TotalItemCount);
+
+                return await Task.FromResult(View(pagedList));
             }
             catch (Exception)
             {
@@ -84,11 +71,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentEditView studentEdit = new StudentEditView();
-                studentEdit.Id = id;
-                studentEdit.Address = student.Address;
-                studentEdit.FirstName = student.FirstName;
-                studentEdit.LastName = student.LastName;
+                StudentEditView studentEdit = _mapper.Map<StudentEditView>(student);
 
                 return View(studentEdit);
             }
@@ -102,11 +85,7 @@ namespace SchoolMS.MVC.Controllers
         {
             try
             {
-                StudentModelDTO studentDto = new StudentModelDTO();
-                studentDto.Id = student.Id;
-                studentDto.Address = student.Address;
-                studentDto.FirstName = student.FirstName;
-                studentDto.LastName = student.LastName;
+                var studentDto = _mapper.Map<StudentEditView ,StudentModelDTO>(student);
 
                 bool isEdited = await StudentService.EditStudent(studentDto.Id, studentDto);
                 if (!isEdited)
@@ -130,13 +109,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentListView studentView = new StudentListView
-                {
-                    FirstName = student.FirstName,
-                    LastName = student.LastName,
-                    Id = id,
-                    SchoolName = student.SchoolName
-                };
+                StudentListView studentView = _mapper.Map<StudentListView>(student);
                 return View(studentView);
             }
             catch (Exception)
@@ -155,13 +128,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentListView studentView = new StudentListView
-                {
-                    FirstName=studentDto.FirstName,
-                    LastName=studentDto.LastName,
-                    Id = id,
-                    SchoolName = studentDto.SchoolName
-                };
+                StudentListView studentView = _mapper.Map<StudentListView>(studentDto);
                 return View(studentView);
             }
             catch (Exception)
@@ -190,19 +157,14 @@ namespace SchoolMS.MVC.Controllers
         [HttpGet]
         public async Task<ActionResult> Create()
         {
-            return View("Create");
+            return await Task.FromResult(View("Create"));
         }
         [HttpPost, ActionName("Create")]
         public async Task<ActionResult> Create(StudentCreateView studentCreateView)
         {
             try
-            {              
-                StudentModelDTO studentModel = new StudentModelDTO();
-                studentModel.FirstName = studentCreateView.FirstName;
-                studentModel.LastName = studentCreateView.LastName;
-                studentModel.Address = studentCreateView.Address;
-                studentModel.DOB = studentCreateView.DOB;
-                studentModel.SchoolId = studentCreateView.SchoolId;
+            {
+                StudentModelDTO studentModel = _mapper.Map<StudentModelDTO>(studentCreateView);
 
                 bool isAdded = await StudentService.AddNewStudent(studentModel);
                 if(!isAdded)

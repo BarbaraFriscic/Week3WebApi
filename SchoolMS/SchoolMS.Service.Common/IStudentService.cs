@@ -1,4 +1,5 @@
-﻿using SchoolMS.Common;
+﻿using PagedList;
+using SchoolMS.Common;
 using SchoolMS.Model;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace SchoolMS.Service.Common
 {
     public interface IStudentService
     {
-        Task<List<StudentModelDTO>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter filtering);
+        Task<IPagedList<StudentModelDTO>> GetAllStudents(string sortBy, string search, int pageNumber, int pageSize);
         Task<StudentModelDTO> GetStudent(Guid id);
         Task<bool> AddNewStudent(StudentModelDTO student);
         Task<bool> EditStudent(Guid id, StudentModelDTO student);

@@ -1,4 +1,5 @@
-﻿using SchoolMS.Common;
+﻿using PagedList;
+using SchoolMS.Common;
 using SchoolMS.DAL;
 using SchoolMS.Model;
 using SchoolMS.Repository.Common;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+
 
 namespace SchoolMS.Repository
 {
@@ -93,26 +95,40 @@ namespace SchoolMS.Repository
             }
         }
 
-        public async Task<List<StudentModelDTO>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter studentFilter)
+        public async Task<IPagedList<StudentModelDTO>> GetAllStudents(string sortBy, string search, int pageNumber, int pageSize)
         {
             try
             {
-                IQueryable<Student> query = Context.Student.Include(s => s.School).AsQueryable();
+                IQueryable<Student> query = Context.Student.Include(s => s.School).Where(s => s.FirstName.Contains(search) || s.LastName.Contains(search) || search == null).AsQueryable();
 
-                if(studentFilter != null)
+                switch (sortBy)
                 {
-                    query = CheckFilter(studentFilter, query);
-                }  
-                if (sorting != null)
-                {                  
-                    query = CheckOrderBy(sorting, query);
-                }                
-                if(paging != null)
-                {
-                    query = query.Skip((int)((paging.PageNumber - 1) * paging.PageSize)).Take((int)paging.PageSize);
+                    case null:
+                        query = query.OrderByDescending(s => s.LastName);
+                        break;
+                    case "FirstName desc":
+                        query = query.OrderByDescending(s => s.FirstName);
+                        break;
+                    case "FirstName":
+                        query = query.OrderBy(s => s.FirstName);
+                        break;
+                    case "LastName desc":
+                        query = query.OrderByDescending(s => s.LastName);
+                        break;
+                    case "LastName":
+                        query = query.OrderBy(s => s.LastName);
+                        break;
+                    case "SchoolName desc":
+                        query = query.OrderByDescending(s => s.School.Name);
+                        break;
+                    case "SchoolName":
+                        query = query.OrderBy(s => s.School.Name);
+                        break;
                 }
 
-                List<StudentModelDTO> studentDtos = await query.Select(s => new StudentModelDTO()
+                var result=query.ToPagedList(pageNumber, pageSize);
+
+                List<StudentModelDTO> studentDtos = result.Select(s => new StudentModelDTO()
                 {
                     Id = s.Id,
                     FirstName = s.FirstName,
@@ -122,9 +138,11 @@ namespace SchoolMS.Repository
                     SchoolId = s.SchoolId,
                     DOB = s.DOB,
                     SchoolName = s.School.Name
-                }).ToListAsync();
+                }).ToList();
 
-                return studentDtos;                     
+                var pagedList = new StaticPagedList<StudentModelDTO>(studentDtos,pageNumber, pageSize, result.TotalItemCount);
+
+                return await Task.FromResult(pagedList);                     
             }
             catch (Exception)
             {

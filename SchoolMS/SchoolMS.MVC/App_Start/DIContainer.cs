@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Integration.Mvc;
+using AutoMapper;
 using SchoolMS.DAL;
 using SchoolMS.Repository;
 using SchoolMS.Repository.Common;
@@ -23,7 +24,18 @@ namespace SchoolMS.MVC.App_Start
 
             builder.RegisterType<StudentService>().As<IStudentService>();
             builder.RegisterType<EFStudentRepository>().As<IStudentRepository>();
+            builder.RegisterType<SchoolService>().As<ISchoolService>();
+            builder.RegisterType<EFSchoolRepository>().As<ISchoolRepository>();
             builder.RegisterType<SchoolMSContext>().AsSelf().InstancePerLifetimeScope();
+
+            builder.Register(context => new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<AutoMapperProfile>();
+            })).AsSelf().SingleInstance();
+
+            builder.Register(c => c.Resolve<MapperConfiguration>().CreateMapper(c.Resolve))
+                .As<IMapper>()
+                .InstancePerLifetimeScope();
 
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
