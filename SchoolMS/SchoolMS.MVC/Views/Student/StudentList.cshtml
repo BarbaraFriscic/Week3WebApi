@@ -6,56 +6,57 @@
     ViewBag.Title = "StudentList";
 }
 
-<h2>StudentList</h2>
+<div style="font-family:Arial">
+    <h2>StudentList</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-    @using (Html.BeginForm("StudentList", "Student", FormMethod.Get))
-    {
-        
-        @Html.TextBox("search") <input type="submit" value="Search" />
-    }
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @*@Html.DisplayNameFor(model => model.First().FirstName)*@
-            @Html.ActionLink("FirstName", "StudentList", new { sortBy = ViewBag.SortByFirstName, search = Request.QueryString["search"]})
-        </th>
-        <th>
-            @*@Html.DisplayNameFor(model => model.First().LastName)*@
-            @Html.ActionLink("LastName", "StudentList", new { sortBy = ViewBag.SortByLastName, search = Request.QueryString["search"] })
+    <p>
+        @Html.ActionLink("Create New", "Create")
+        @using (Html.BeginForm("StudentList", "Student", FormMethod.Get))
+        {
 
-        </th>
-        <th>
-            @*@Html.DisplayNameFor(model => model.First().SchoolName)*@
-            @Html.ActionLink("SchoolName", "StudentList", new { sortBy = ViewBag.SortBySchoolName, search = Request.QueryString["search"] })
-
-        </th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model)
-    {
+            @Html.TextBox("search") <input type="submit" value="Search" />
+        }
+    </p>
+    <table class="table">
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SchoolName)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-            </td>
+            <th>
+                @*@Html.DisplayNameFor(model => model.First().FirstName)*@
+                @Html.ActionLink("FirstName", "StudentList", new { sortBy = ViewBag.SortByFirstName, search = Request.QueryString["search"] })
+            </th>
+            <th>
+                @*@Html.DisplayNameFor(model => model.First().LastName)*@
+                @Html.ActionLink("LastName", "StudentList", new { sortBy = ViewBag.SortByLastName, search = Request.QueryString["search"] })
+
+            </th>
+            <th>
+                @*@Html.DisplayNameFor(model => model.First().SchoolName)*@
+                @Html.ActionLink("SchoolName", "StudentList", new { sortBy = ViewBag.SortBySchoolName, search = Request.QueryString["search"] })
+
+            </th>
+            <th></th>
         </tr>
-    }
 
-</table>
-@Html.PagedListPager(Model, pageNumber => Url.Action("StudentList", new { pageNumber, search = Request.QueryString["search"], sortBy = Request["sortBy"] }),
-    new PagedListRenderOptions() { Display = PagedListDisplayMode.IfNeeded, DisplayPageCountAndCurrentLocation = true})
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SchoolName)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                </td>
+            </tr>
+        }
 
+    </table>
+    @Html.PagedListPager(Model, pageNumber => Url.Action("StudentList", new { pageNumber, search = Request.QueryString["search"], sortBy = Request["sortBy"] }),
+        new PagedListRenderOptions() { Display = PagedListDisplayMode.IfNeeded, DisplayPageCountAndCurrentLocation = true })
+</div>

@@ -12,22 +12,25 @@ using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using PagedList;
 using PagedList.Mvc;
+using AutoMapper;
 
 namespace SchoolMS.MVC.Controllers
 {
     public class StudentController : Controller
     {
+        private IMapper _mapper { get; set; }
         protected IStudentService StudentService { get; set; }
         protected ISchoolService SchoolService { get; set; }
         
-        public StudentController(IStudentService studentService, ISchoolService schoolService)
+        public StudentController(IStudentService studentService, ISchoolService schoolService, IMapper mapper)
         {
             StudentService = studentService;
             SchoolService = schoolService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult> StudentList(string sortBy, string search, int? pageNumber, int? pageSize)
+        public async Task<ActionResult> StudentList(string sortBy, string searchBy, string search, int? pageNumber, int? pageSize)
         {
             try
             {
@@ -49,7 +52,7 @@ namespace SchoolMS.MVC.Controllers
                     SchoolName = s.SchoolName
                 }).ToList();
                 
-                var pagedList = new StaticPagedList<StudentListView>(studentsView,pageNumber ?? 1,pageSize ?? 5,studentDtos.TotalItemCount);
+                var pagedList = new StaticPagedList<StudentListView>(studentsView, pageNumber ?? 1,pageSize ?? 5,studentDtos.TotalItemCount);
 
                 return await Task.FromResult(View(pagedList));
             }
@@ -68,11 +71,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentEditView studentEdit = new StudentEditView();
-                studentEdit.Id = id;
-                studentEdit.Address = student.Address;
-                studentEdit.FirstName = student.FirstName;
-                studentEdit.LastName = student.LastName;
+                StudentEditView studentEdit = _mapper.Map<StudentEditView>(student);
 
                 return View(studentEdit);
             }
@@ -86,11 +85,7 @@ namespace SchoolMS.MVC.Controllers
         {
             try
             {
-                StudentModelDTO studentDto = new StudentModelDTO();
-                studentDto.Id = student.Id;
-                studentDto.Address = student.Address;
-                studentDto.FirstName = student.FirstName;
-                studentDto.LastName = student.LastName;
+                var studentDto = _mapper.Map<StudentEditView ,StudentModelDTO>(student);
 
                 bool isEdited = await StudentService.EditStudent(studentDto.Id, studentDto);
                 if (!isEdited)
@@ -114,13 +109,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentListView studentView = new StudentListView
-                {
-                    FirstName = student.FirstName,
-                    LastName = student.LastName,
-                    Id = id,
-                    SchoolName = student.SchoolName
-                };
+                StudentListView studentView = _mapper.Map<StudentListView>(student);
                 return View(studentView);
             }
             catch (Exception)
@@ -139,13 +128,7 @@ namespace SchoolMS.MVC.Controllers
                 {
                     return View("Error");
                 }
-                StudentListView studentView = new StudentListView
-                {
-                    FirstName=studentDto.FirstName,
-                    LastName=studentDto.LastName,
-                    Id = id,
-                    SchoolName = studentDto.SchoolName
-                };
+                StudentListView studentView = _mapper.Map<StudentListView>(studentDto);
                 return View(studentView);
             }
             catch (Exception)
@@ -174,19 +157,14 @@ namespace SchoolMS.MVC.Controllers
         [HttpGet]
         public async Task<ActionResult> Create()
         {
-            return View("Create");
+            return await Task.FromResult(View("Create"));
         }
         [HttpPost, ActionName("Create")]
         public async Task<ActionResult> Create(StudentCreateView studentCreateView)
         {
             try
-            {              
-                StudentModelDTO studentModel = new StudentModelDTO();
-                studentModel.FirstName = studentCreateView.FirstName;
-                studentModel.LastName = studentCreateView.LastName;
-                studentModel.Address = studentCreateView.Address;
-                studentModel.DOB = studentCreateView.DOB;
-                studentModel.SchoolId = studentCreateView.SchoolId;
+            {
+                StudentModelDTO studentModel = _mapper.Map<StudentModelDTO>(studentCreateView);
 
                 bool isAdded = await StudentService.AddNewStudent(studentModel);
                 if(!isAdded)
