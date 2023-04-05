@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 
 namespace SchoolMS.Repository
 {
-    public class StudentRepository : IStudentRepository
+    public class StudentRepository 
     {
         public static string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolMS;Integrated Security=True";
 
-        public async Task<List<StudentModelDTO>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter studentFilter)
+        public async Task<List<StudentModelDTO>> GetAllStudents(string search, int pageNumber, int pageSize)
         {
             try
             {
@@ -27,59 +27,59 @@ namespace SchoolMS.Repository
 
                     SqlCommand commmand = new SqlCommand();
                     queryString.AppendLine("select * from Student where 1=1");           
-                    if (studentFilter != null)
-                    {
-                        if (studentFilter.SchoolId != Guid.Empty)
-                        {
-                            queryString.AppendLine("and SchoolId = @schoolId ");
-                            commmand.Parameters.AddWithValue("@schoolId", studentFilter.SchoolId);
+                    //if (studentFilter != null)
+                    //{
+                    //    if (studentFilter.SchoolId != Guid.Empty)
+                    //    {
+                    //        queryString.AppendLine("and SchoolId = @schoolId ");
+                    //        commmand.Parameters.AddWithValue("@schoolId", studentFilter.SchoolId);
 
-                        }
-                        if(studentFilter.Name != null)
-                        {
-                            queryString.AppendLine("and FirstName like '%'+@name+'%' or LastName like '%'+@name+'%' ");
-                            commmand.Parameters.AddWithValue("@name", studentFilter.Name);
-                        }
-                        if(studentFilter.AverageFrom != null)
-                        {
-                            queryString.AppendLine("and Average >= @averageFrom ");
-                            commmand.Parameters.AddWithValue("@averageFrom", studentFilter.AverageFrom);
-                        }
-                        if (studentFilter.AverageTo != null)
-                        {
-                            queryString.AppendLine("and Average <= @averageTo ");
-                            commmand.Parameters.AddWithValue("@averageTo", studentFilter.AverageTo);
-                        }
-                        if (studentFilter.Average != null)
-                        {
-                            queryString.AppendLine("and Average = @average ");
-                            commmand.Parameters.AddWithValue("@average", studentFilter.Average);
-                        }
-                        if(studentFilter.DOBFrom != null)
-                        {
-                            if(studentFilter.DOBTo != null)
-                            {
-                                queryString.AppendLine("and DOB between @dobFrom and @dobTo ");                               
-                            }
-                            queryString.AppendLine("and DOB between @dobFrom and '1-1-2999' ");
-                            commmand.Parameters.AddWithValue("@dobFrom", studentFilter.DOBFrom);
-                        }
-                        if (studentFilter.DOBTo != null)
-                        {
-                            queryString.AppendLine("and DOB between '1-1-1900' and @dobTo ");
-                            commmand.Parameters.AddWithValue("@dobTo", studentFilter.DOBTo);
-                        }
-                    }
-                    if (sorting != null)
-                    {
-                        queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder} ");
-                    }
-                    if(paging != null)
-                    {
-                        queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only" );
-                        commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
-                        commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
-                    }
+                    //    }
+                    //    if(studentFilter.Name != null)
+                    //    {
+                    //        queryString.AppendLine("and FirstName like '%'+@name+'%' or LastName like '%'+@name+'%' ");
+                    //        commmand.Parameters.AddWithValue("@name", studentFilter.Name);
+                    //    }
+                    //    if(studentFilter.AverageFrom != null)
+                    //    {
+                    //        queryString.AppendLine("and Average >= @averageFrom ");
+                    //        commmand.Parameters.AddWithValue("@averageFrom", studentFilter.AverageFrom);
+                    //    }
+                    //    if (studentFilter.AverageTo != null)
+                    //    {
+                    //        queryString.AppendLine("and Average <= @averageTo ");
+                    //        commmand.Parameters.AddWithValue("@averageTo", studentFilter.AverageTo);
+                    //    }
+                    //    if (studentFilter.Average != null)
+                    //    {
+                    //        queryString.AppendLine("and Average = @average ");
+                    //        commmand.Parameters.AddWithValue("@average", studentFilter.Average);
+                    //    }
+                    //    if(studentFilter.DOBFrom != null)
+                    //    {
+                    //        if(studentFilter.DOBTo != null)
+                    //        {
+                    //            queryString.AppendLine("and DOB between @dobFrom and @dobTo ");                               
+                    //        }
+                    //        queryString.AppendLine("and DOB between @dobFrom and '1-1-2999' ");
+                    //        commmand.Parameters.AddWithValue("@dobFrom", studentFilter.DOBFrom);
+                    //    }
+                    //    if (studentFilter.DOBTo != null)
+                    //    {
+                    //        queryString.AppendLine("and DOB between '1-1-1900' and @dobTo ");
+                    //        commmand.Parameters.AddWithValue("@dobTo", studentFilter.DOBTo);
+                    //    }
+                    //}
+                    //if (sorting != null)
+                    //{
+                    //    queryString.AppendLine($"order by {sorting.OrderBy} {sorting.SortOrder} ");
+                    //}
+                    //if(paging != null)
+                    //{
+                    //    queryString.AppendLine("offset (@pageNumber - 1) * @pageSize rows fetch next @pageSize rows only" );
+                    //    commmand.Parameters.AddWithValue("@pageNumber", paging.PageNumber);
+                    //    commmand.Parameters.AddWithValue("@pageSize", paging.PageSize);
+                    //}
                     commmand.Connection = connection;
                     commmand.CommandText = queryString.ToString();
 

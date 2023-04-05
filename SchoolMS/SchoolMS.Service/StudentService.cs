@@ -1,4 +1,5 @@
-﻿using SchoolMS.Common;
+﻿using PagedList;
+using SchoolMS.Common;
 using SchoolMS.Model;
 using SchoolMS.Repository;
 using SchoolMS.Repository.Common;
@@ -20,9 +21,9 @@ namespace SchoolMS.Service
             StudentRepository = studentRepository;
         }
 
-        public async Task<List<StudentModelDTO>> GetAllStudents(Paging paging, Sorting sorting, StudentFilter filtering)
+        public async Task<IPagedList<StudentModelDTO>> GetAllStudents(string sortBy, string search, int pageNumber, int pageSize)
         {
-            List<StudentModelDTO> students = await StudentRepository.GetAllStudents(paging, sorting, filtering);
+            IPagedList<StudentModelDTO> students = await StudentRepository.GetAllStudents(sortBy, search, pageNumber, pageSize);
 
             return students;
         }

@@ -23,7 +23,10 @@ namespace SchoolMS.MVC.App_Start
 
             builder.RegisterType<StudentService>().As<IStudentService>();
             builder.RegisterType<EFStudentRepository>().As<IStudentRepository>();
+            builder.RegisterType<SchoolService>().As<ISchoolService>();
+            builder.RegisterType<EFSchoolRepository>().As<ISchoolRepository>();
             builder.RegisterType<SchoolMSContext>().AsSelf().InstancePerLifetimeScope();
+
 
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));

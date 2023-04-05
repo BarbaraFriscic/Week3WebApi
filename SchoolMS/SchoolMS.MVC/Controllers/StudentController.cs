@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using PagedList;
+using PagedList.Mvc;
 
 namespace SchoolMS.MVC.Controllers
 {
@@ -25,49 +27,31 @@ namespace SchoolMS.MVC.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> StudentList(DateTime? dobTo = null, DateTime? dobFrom = null, decimal? average = null,
-            decimal? averageTo = null, decimal? averageFrom = null, string name = null,
-            Nullable<Guid> schoolId = null, int pageNumber = 1, int pageSize = 5, string orderByColumn = "Id",
-            string sortOrder = "asc")
+        public async Task<ActionResult> StudentList(string sortBy, string search, int? pageNumber, int? pageSize)
         {
             try
             {
-                Paging paging = new Paging
-                {
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                };
-                Sorting sorting = new Sorting
-                {
-                    SortOrder = sortOrder,
-                    OrderBy = orderByColumn,
-                };
-                StudentFilter filter = new StudentFilter
-                {
-                    Name = name == null ? null : name,
-                    SchoolId = (Guid)(schoolId == null ? Guid.Empty : schoolId),
-                    AverageFrom = averageFrom == null ? (decimal?)null : averageFrom,
-                    AverageTo = averageTo == null ? (decimal?)null : averageTo,
-                    Average = average == null ? (decimal?)null : average,
-                    DOBFrom = dobFrom == null ? (DateTime?)null : dobFrom,
-                    DOBTo = dobTo == null ? (DateTime?)null : dobTo,
-                };
-                List<StudentModelDTO> studentDtos = await StudentService.GetAllStudents(paging, sorting, filter);
-                List<StudentListView> studentsView = new List<StudentListView>();
+                ViewBag.SortByFirstName = string.IsNullOrEmpty(sortBy) ? "FirstName desc" : "";
+                ViewBag.SortByLastName = sortBy == "LastName" ? "LastName desc" : "LastName";
+                ViewBag.SortBySchoolName = sortBy == "SchoolName" ? "SchoolName desc" : "SchoolName";
+
+                IPagedList<StudentModelDTO> studentDtos = await StudentService.GetAllStudents(sortBy, search, pageNumber ?? 1, pageSize ?? 5);
+                
                 if (studentDtos == null)
                 {
                     return View("Error");
                 }
-                foreach (StudentModelDTO student in studentDtos)
+                List<StudentListView> studentsView = studentDtos.Select(s => new StudentListView()
                 {
-                    StudentListView studentView = new StudentListView();
-                    studentView.Id = student.Id;
-                    studentView.SchoolName = student.SchoolName;
-                    studentView.FirstName = student.FirstName;
-                    studentView.LastName = student.LastName;
-                    studentsView.Add(studentView);
-                }
-                return View(studentsView);
+                    FirstName = s.FirstName,
+                    Id = s.Id,
+                    LastName = s.LastName,
+                    SchoolName = s.SchoolName
+                }).ToList();
+                
+                var pagedList = new StaticPagedList<StudentListView>(studentsView,pageNumber ?? 1,pageSize ?? 5,studentDtos.TotalItemCount);
+
+                return await Task.FromResult(View(pagedList));
             }
             catch (Exception)
             {
