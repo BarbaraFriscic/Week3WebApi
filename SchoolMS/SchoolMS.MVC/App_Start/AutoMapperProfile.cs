@@ -14,6 +14,8 @@ namespace SchoolMS.MVC.App_Start
         public AutoMapperProfile()
         {
             CreateMap<StudentEditView, StudentModelDTO>();
+            CreateMap<StudentModelDTO, StudentEditView>();
+            CreateMap<StudentModelDTO, StudentListView>();
             CreateMap<StudentCreateView, StudentModelDTO>();
             
         }
