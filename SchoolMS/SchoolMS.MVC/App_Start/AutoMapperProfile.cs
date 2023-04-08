@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SchoolMS.DAL;
 using SchoolMS.Model;
 using SchoolMS.MVC.Models;
 using SchoolMS.MVC.Models.StudentView;
@@ -17,6 +18,8 @@ namespace SchoolMS.MVC.App_Start
             CreateMap<StudentModelDTO, StudentEditView>();
             CreateMap<StudentModelDTO, StudentListView>();
             CreateMap<StudentCreateView, StudentModelDTO>();
+            CreateMap<Student, StudentModelDTO>();
+            CreateMap<StudentModelDTO, Student>();
             
         }
     }
