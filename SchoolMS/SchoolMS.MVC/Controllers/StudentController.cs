@@ -18,7 +18,7 @@ namespace SchoolMS.MVC.Controllers
 {
     public class StudentController : Controller
     {
-        private IMapper _mapper { get; set; }
+        private IMapper _mapper;
         protected IStudentService StudentService { get; set; }
         protected ISchoolService SchoolService { get; set; }
         
@@ -85,7 +85,15 @@ namespace SchoolMS.MVC.Controllers
         {
             try
             {
-                var studentDto = _mapper.Map<StudentEditView ,StudentModelDTO>(student);
+                //var studentDto = _mapper.Map<StudentEditView ,StudentModelDTO>(student);
+
+                StudentModelDTO studentDto = new StudentModelDTO
+                {
+                    Address = student.Address,
+                    Id = student.Id,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                };
 
                 bool isEdited = await StudentService.EditStudent(studentDto.Id, studentDto);
                 if (!isEdited)

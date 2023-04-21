@@ -83,11 +83,11 @@ namespace SchoolMS.Repository
                 StudentModelDTO studentDTO = await GetStudent(id);
                 if (studentDTO != null)
                 {
-                    Student studentDal = await Context.Student.Where(s => s.Id == student.Id).FirstOrDefaultAsync();  
-                    studentDal = _mapper.Map<Student>(studentDTO);
-                    //studentDal.FirstName = student.FirstName;
-                    //studentDal.LastName = student.LastName;
-                    //studentDal.Address = student.Address;
+                    Student studentDal = await Context.Student.Where(s => s.Id == student.Id).FirstOrDefaultAsync();
+                    //studentDal = _mapper.Map<Student>(studentDTO);
+                    studentDal.FirstName = student.FirstName;
+                    studentDal.LastName = student.LastName;
+                    studentDal.Address = student.Address;
                     await Context.SaveChangesAsync();
 
                     return true;
@@ -134,18 +134,6 @@ namespace SchoolMS.Repository
                 var result=query.ToPagedList(pageNumber, pageSize);
 
                 List<StudentModelDTO> studentDtos = result.Select(s => _mapper.Map<StudentModelDTO>(s)).ToList();
-
-                //List<StudentModelDTO> studentDtos = result.Select(s => new StudentModelDTO()
-                //{
-                //    Id = s.Id,
-                //    FirstName = s.FirstName,
-                //    LastName = s.LastName,
-                //    Average = s.Average,
-                //    Address = s.Address,
-                //    SchoolId = s.SchoolId,
-                //    DOB = s.DOB,
-                //    SchoolName = s.School.Name
-                //}).ToList();
 
                 var pagedList = new StaticPagedList<StudentModelDTO>(studentDtos,pageNumber, pageSize, result.TotalItemCount);
 
